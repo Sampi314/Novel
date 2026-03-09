@@ -2,3 +2,4 @@ node_modules
 dist
 fmg/node_modules
 fmg/dist
+test-results/
