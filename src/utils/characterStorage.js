@@ -9,8 +9,8 @@ export function getNextCharacterId(existingCharacters) {
   return `c${String(next).padStart(2, '0')}`;
 }
 
-export function buildCharacterBioMarkdown({ name, han, faction, role, backstory, abilities, personality }) {
-  return `---
+export function buildCharacterBioMarkdown({ name, han, faction, role, appearance, backstory, abilities, personality }) {
+  let md = `---
 name: ${name}
 han: ${han}
 ---
@@ -22,22 +22,16 @@ ${role}
 
 ## Thế lực
 ${faction}
-
-## Tính cách
-${personality}
-
-## Năng lực
-${abilities}
-
-## Tiểu sử
-${backstory}
 `;
+  if (appearance) md += `\n## Ngoại hình\n${appearance}\n`;
+  md += `\n## Tính cách\n${personality}\n\n## Năng lực\n${abilities}\n\n## Tiểu sử\n${backstory}\n`;
+  return md;
 }
 
 export async function saveCharacter({
   id, name, han, faction, role, qi_affinity, power,
   era_start, era_end, location_id, journey,
-  backstory, abilities, personality,
+  appearance, backstory, abilities, personality,
 }) {
   // Read current CSV
   const csvRes = await fetch(import.meta.env.BASE_URL + 'data/characters.csv');
@@ -70,9 +64,9 @@ export async function saveCharacter({
   await writeFile('public/data/characters.csv', newCsv);
 
   // Save biography markdown
-  if (backstory || abilities || personality) {
+  if (appearance || backstory || abilities || personality) {
     const factionName = faction || '';
-    const md = buildCharacterBioMarkdown({ name, han, faction: factionName, role, backstory, abilities, personality });
+    const md = buildCharacterBioMarkdown({ name, han, faction: factionName, role, appearance, backstory, abilities, personality });
     await writeFile(`public/data/characters/${id}.md`, md);
   }
 
