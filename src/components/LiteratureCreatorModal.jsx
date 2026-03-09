@@ -498,7 +498,105 @@ Respond with ONLY the JSON object. No markdown fences.`;
             </div>
           )}
 
+          {/* Mode tabs */}
           {step === 'input' && (
+            <div style={{ display: 'flex', gap: 6, marginBottom: 18 }}>
+              {[{ id: 'single', label: 'Đơn lẻ' }, { id: 'series', label: 'Loạt bài' }, { id: 'queue', label: 'Hàng đợi' }].map(m => (
+                <button key={m.id} onClick={() => setMode(m.id)} style={{
+                  padding: '6px 14px', fontSize: 12, borderRadius: 4, cursor: 'pointer',
+                  border: `1px solid ${mode === m.id ? 'var(--gold)' : 'var(--border)'}`,
+                  background: mode === m.id ? 'var(--gold-glow)' : 'var(--bg-input)',
+                  color: mode === m.id ? 'var(--gold)' : 'var(--text-dim)',
+                }}>{m.label}</button>
+              ))}
+            </div>
+          )}
+
+          {step === 'input' && mode === 'series' && (
+            <>
+              {!showApiKeySettings && getApiKey() && (
+                <div style={{ textAlign: 'right', marginBottom: 12 }}>
+                  <button onClick={() => setShowApiKeySettings(true)} style={{ ...ms.secondaryButton, fontSize: 11, padding: '4px 10px' }}>API Key ✓</button>
+                </div>
+              )}
+              <div style={ms.typeTabs}>
+                {TYPES.map(t => (
+                  <div key={t.id} style={ms.typeTab(seriesForm.type === t.id)} onClick={() => setSeriesForm(f => ({ ...f, type: t.id }))}>
+                    <div style={ms.typeTabVi(seriesForm.type === t.id)}>{t.vi}</div>
+                    <div style={ms.typeTabHan}>{t.han}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={ms.fieldGroup}>
+                <div style={ms.label}>Kỷ Nguyên</div>
+                <select value={seriesForm.era} onChange={e => setSeriesForm(f => ({ ...f, era: e.target.value }))} style={ms.select}>
+                  <option value="">— Chọn kỷ nguyên —</option>
+                  {eras.map(era => <option key={era.name} value={era.name}>{era.name}{era.han ? ` (${era.han})` : ''}</option>)}
+                </select>
+              </div>
+              <div style={ms.fieldGroup}>
+                <div style={ms.label}>Chủ đề cho loạt bài</div>
+                <textarea value={seriesForm.theme} onChange={e => setSeriesForm(f => ({ ...f, theme: e.target.value }))} placeholder="VD: Cuộc sống phàm nhân trong thời loạn..." style={ms.textarea} />
+              </div>
+              <div style={ms.fieldGroup}>
+                <div style={ms.label}>Số lượng ({seriesForm.count})</div>
+                <input type="range" min={2} max={10} value={seriesForm.count} onChange={e => setSeriesForm(f => ({ ...f, count: +e.target.value }))} style={{ width: '100%' }} />
+              </div>
+            </>
+          )}
+
+          {step === 'input' && mode === 'queue' && (
+            <>
+              {!showApiKeySettings && getApiKey() && (
+                <div style={{ textAlign: 'right', marginBottom: 12 }}>
+                  <button onClick={() => setShowApiKeySettings(true)} style={{ ...ms.secondaryButton, fontSize: 11, padding: '4px 10px' }}>API Key ✓</button>
+                </div>
+              )}
+              <div style={ms.typeTabs}>
+                {TYPES.map(t => (
+                  <div key={t.id} style={ms.typeTab(form.type === t.id)} onClick={() => setForm(f => ({ ...f, type: t.id }))}>
+                    <div style={ms.typeTabVi(form.type === t.id)}>{t.vi}</div>
+                    <div style={ms.typeTabHan}>{t.han}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+                <div style={ms.fieldGroup}>
+                  <div style={ms.label}>Tiêu đề</div>
+                  <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Tên tác phẩm..." style={ms.input} />
+                </div>
+                <div style={ms.fieldGroup}>
+                  <div style={ms.label}>Kỷ Nguyên</div>
+                  <select value={form.era} onChange={e => setForm(f => ({ ...f, era: e.target.value }))} style={ms.select}>
+                    <option value="">— Chọn —</option>
+                    {eras.map(era => <option key={era.name} value={era.name}>{era.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={ms.fieldGroup}>
+                <div style={ms.label}>Ý tưởng</div>
+                <textarea value={form.concept} onChange={e => setForm(f => ({ ...f, concept: e.target.value }))} placeholder="Mô tả ngắn gọn..." style={{ ...ms.textarea, minHeight: 50 }} />
+              </div>
+              <button onClick={addToQueue} disabled={!form.title || !form.era || !form.concept} style={{ ...ms.secondaryButton, color: 'var(--gold)', opacity: (!form.title || !form.era || !form.concept) ? 0.4 : 1, marginBottom: 16 }}>
+                + Thêm vào hàng đợi
+              </button>
+              {queue.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: 'var(--gold-dim)', marginBottom: 8 }}>Hàng đợi ({queue.length})</div>
+                  {queue.map((q, i) => (
+                    <div key={q._key} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--bg-input)', borderRadius: 4, marginBottom: 4, fontSize: 13, color: 'var(--text)' }}>
+                      <span style={{ color: 'var(--gold-dim)', fontWeight: 600, minWidth: 20 }}>#{i + 1}</span>
+                      <span style={{ flex: 1 }}>{q.title}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{q.era}</span>
+                      <button onClick={() => removeFromQueue(q._key)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 14 }}>&times;</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {step === 'input' && mode === 'single' && (
             <>
               {!showApiKeySettings && getApiKey() && (
                 <div style={{ textAlign: 'right', marginBottom: 12 }}>
@@ -583,7 +681,19 @@ Respond with ONLY the JSON object. No markdown fences.`;
           {step === 'generating' && (
             <div style={ms.generating}>
               <div style={ms.genChar}>文</div>
-              <div style={ms.genText}>Đang sáng tác...</div>
+              <div style={ms.genText}>
+                {mode === 'series' ? `Đang sáng tác ${seriesProgress.current}/${seriesProgress.total}...` :
+                 mode === 'queue' ? `Đang sáng tác ${queueProgress.current}/${queueProgress.total}...` :
+                 'Đang sáng tác...'}
+              </div>
+              {(mode === 'series' || mode === 'queue') && (
+                <div style={{ width: 200, height: 4, background: 'var(--border)', borderRadius: 2 }}>
+                  <div style={{
+                    width: `${((mode === 'series' ? seriesProgress.current : queueProgress.current) / (mode === 'series' ? seriesProgress.total : queueProgress.total)) * 100}%`,
+                    height: '100%', background: 'var(--gold)', borderRadius: 2, transition: 'width 0.3s',
+                  }} />
+                </div>
+              )}
               <button onClick={() => setStep('input')} style={ms.secondaryButton}>Hủy</button>
             </div>
           )}
@@ -619,6 +729,38 @@ Respond with ONLY the JSON object. No markdown fences.`;
             </>
           )}
 
+          {step === 'series-review' && (
+            <>
+              <div style={{ marginBottom: 16, fontSize: 13, color: 'var(--text-dim)' }}>
+                Đã tạo {seriesResults.length} tác phẩm. Xem qua trước khi lưu.
+              </div>
+              {seriesResults.map((r, i) => (
+                <div key={i} style={{ ...ms.sectionCard, marginBottom: 16 }}>
+                  <div style={{ fontSize: 15, color: 'var(--gold)', fontWeight: 600, marginBottom: 8 }}>{r.title || `#${i + 1}`}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 8, maxHeight: 120, overflow: 'auto', lineHeight: 1.6 }}>
+                    {r.original?.substring(0, 300)}{r.original?.length > 300 ? '...' : ''}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {step === 'queue-review' && (
+            <>
+              <div style={{ marginBottom: 16, fontSize: 13, color: 'var(--text-dim)' }}>
+                Đã tạo {queueResults.length}/{queue.length} tác phẩm. Xem qua trước khi lưu.
+              </div>
+              {queueResults.map((r, i) => (
+                <div key={i} style={{ ...ms.sectionCard, marginBottom: 16 }}>
+                  <div style={{ fontSize: 15, color: 'var(--gold)', fontWeight: 600, marginBottom: 8 }}>{r.title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 8, maxHeight: 120, overflow: 'auto', lineHeight: 1.6 }}>
+                    {r._sections?.original?.substring(0, 300)}{r._sections?.original?.length > 300 ? '...' : ''}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
           {step === 'saving' && (
             <div style={ms.generating}>
               <div style={{ fontSize: 40, animation: 'spin-slow 2s linear infinite', color: 'var(--gold)' }}>⟳</div>
@@ -637,7 +779,7 @@ Respond with ONLY the JSON object. No markdown fences.`;
         </div>
 
         {/* Footer */}
-        {step === 'input' && (
+        {step === 'input' && mode === 'single' && (
           <div style={ms.footer}>
             <button onClick={onClose} style={ms.secondaryButton}>Hủy</button>
             <button
@@ -650,10 +792,50 @@ Respond with ONLY the JSON object. No markdown fences.`;
           </div>
         )}
 
+        {step === 'input' && mode === 'series' && (
+          <div style={ms.footer}>
+            <button onClick={onClose} style={ms.secondaryButton}>Hủy</button>
+            <button
+              onClick={handleSeriesGenerate}
+              disabled={!seriesForm.era || !seriesForm.theme || !getApiKey()}
+              style={{ ...ms.goldButton, opacity: (!seriesForm.era || !seriesForm.theme || !getApiKey()) ? 0.4 : 1 }}
+            >
+              Tạo {seriesForm.count} tác phẩm
+            </button>
+          </div>
+        )}
+
+        {step === 'input' && mode === 'queue' && (
+          <div style={ms.footer}>
+            <button onClick={onClose} style={ms.secondaryButton}>Hủy</button>
+            <button
+              onClick={handleQueueGenerate}
+              disabled={queue.length === 0 || !getApiKey()}
+              style={{ ...ms.goldButton, opacity: (queue.length === 0 || !getApiKey()) ? 0.4 : 1 }}
+            >
+              Tạo {queue.length} tác phẩm
+            </button>
+          </div>
+        )}
+
         {step === 'review' && (
           <div style={ms.footer}>
             <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
             <button onClick={handleSave} style={ms.goldButton}>Lưu Tác Phẩm</button>
+          </div>
+        )}
+
+        {step === 'series-review' && (
+          <div style={ms.footer}>
+            <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
+            <button onClick={handleSeriesSaveAll} style={ms.goldButton}>Lưu tất cả ({seriesResults.length})</button>
+          </div>
+        )}
+
+        {step === 'queue-review' && (
+          <div style={ms.footer}>
+            <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
+            <button onClick={handleQueueSaveAll} style={ms.goldButton}>Lưu tất cả ({queueResults.length})</button>
           </div>
         )}
       </div>
