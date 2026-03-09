@@ -1,0 +1,17 @@
+{
+  "tho": [
+    {
+      "id": "tho-001",
+      "title": "Phàm Nhân Dao",
+      "description": "Dân dao Chiến Loạn Kỷ — lời than phàm nhân",
+      "era": "Chiến Loạn Kỷ",
+      "file": "/data/Thơ/Chiến Loạn Kỷ/Phàm Nhân Dao.md",
+      "relatedCharacters": ["c01", "c07"],
+      "relatedEvents": ["e11", "e12"],
+      "relatedLocations": ["l19", "l01"],
+      "tags": ["thể_thơ/dân_dao", "ngôn_ngữ/hán_văn", "cảm_xúc/bi"]
+    }
+  ],
+  "nhac": [],
+  "van": []
+}

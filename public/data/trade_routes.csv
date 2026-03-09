@@ -1,0 +1,13 @@
+id,name,type,waypoints,era_start,era_end,description
+tr01,Thiên Long Thương Lộ,天龍商路,land,2500:1500|3200:2200|3800:3000|4500:4200|5000:5000,0,,Con đường thương mại cổ xưa nối Thiên Sơn với Cố Nguyên Thành qua Bạch Ngọc Kinh.
+tr02,Trung Nguyên Đại Lộ,中原大路,land,5000:5000|5100:4200|5150:3400|5100:2500|5050:1600|5200:900,40000,,Trục đường chính nối kinh đô với các thành phố cực bắc.
+tr03,Đông Hải Thương Tuyến,東海商線,sea,5000:5000|5800:4800|6500:4500|7500:4200|8600:5000|8800:3500,100000,,Tuyến hàng hải nối Cố Nguyên Thành với các cảng phía đông.
+tr04,Nam Minh Thủy Lộ,南冥水路,sea,8600:5000|8200:5800|7800:6500|7200:7200|6500:8000|5500:9200,100000,,Tuyến đường biển phía nam nối Ngọc Hải Cảng với Nam Minh Hải Thành.
+tr05,Tây Nguyên Lộ,西原路,land,5000:5000|4200:5200|3600:5500|2800:5800|2000:5500|1400:5200,80000,,Đường thương mại phía tây nối trung nguyên với lãnh địa Vi Tộc.
+tr06,Linh Dược Chi Lộ,靈藥之路,land,3200:6800|3400:5800|3600:4800|3800:3800|3500:3000|2500:1500,0,,Con đường vận chuyển linh dược từ Linh Thảo Cốc lên Thiên Sơn.
+tr07,Băng Bắc Thương Đạo,冰北商道,land,5200:900|5800:1200|6300:1600|6800:2000|7200:1800,130000,,Tuyến buôn bán vùng đông bắc băng giá kết nối các thành trì biên giới.
+tr08,Hải Tộc Thâm Hải Lộ,海族深海路,sea,8800:3500|9200:4500|9300:5500|9100:6500|8600:7500,0,,Tuyến đường biển bí mật của Hải Tộc dọc bờ đông.
+tr09,Yêu Giới Mật Đạo,妖界密道,land,4000:7500|4600:7800|5200:8200|5800:8500|6500:8200,0,170000,Con đường bí mật xuyên qua lãnh thổ Yêu Giới phía nam.
+tr10,Chiến Tranh Lộ,戰爭路,land,5000:5000|5500:5500|6000:6200|6800:6800|7500:7200,170000,200000,Tuyến hành quân thời Chiến Loạn Kỷ — chỉ tồn tại trong thời chiến.
+tr11,Tân Hòa Bình Đại Lộ,新和平大路,land,2000:5500|3000:5800|4000:6200|5000:6500|6000:6200|7000:5800|8000:5500,200000,,Đại lộ hòa bình thời Hiện Đại Kỷ nối các vùng đất.
+tr12,Linh Hồ Hoàn Lộ,靈湖環路,land,3500:3200|4200:3000|4600:3400|4500:3800|4000:4100|3500:3800|3400:3500,40000,,Con đường vòng quanh Linh Hồ phục vụ thương mại và hành hương.

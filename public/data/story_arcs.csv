@@ -1,0 +1,7 @@
+id,name,han,description,events,characters,era_start,era_end,color
+sa01,Long Vũ Truyền Kiếp,龍羽傳劫,"Câu chuyện thù hận truyền kiếp giữa Long Tộc và Vũ Tộc — từ tranh đỉnh núi đến tổng quyết chiến.",e01|e02|e07|e08|e12,c01|c02|c03,-500000,,#c4a35a
+sa02,Nhân Tộc Chinh Phục,人族征伐,"Hành trình chinh phục đại lục của Nhân Tộc — từ bộ lạc lên vương triều, lợi dụng Cự Tộc, khai thác Thạch Tộc.",e03|e04|e05|e06|e08|e13,c05|c06|c07,0,,#5a8cc4
+sa03,Trùng Giới Nổi Dậy,蟲界起義,"Trùng Tộc bị vạn tộc khinh thường, tích tụ hận thù và nổi dậy đe dọa cả đại lục.",e10|e12,c04,0,200000,#6b8e23
+sa04,Vạn Tộc Hòa Bình,萬族和平,"Con đường dẫn đến hòa bình giữa mười tộc sau hàng nghìn năm chiến tranh.",e08|e09|e14,c05|c13|c12,100000,,#5ac48a
+sa05,Hải Tộc Bí Sử,海族秘史,"Lịch sử bí ẩn của Hải Tộc Liên Bang dưới lòng đại dương.",e08,c13|c14,-500000,,#5ab8c4
+sa06,Thạch Giới Bi Ca,石界悲歌,"Bi kịch của Thạch Tộc — bị khai thác, xâm lấn, từ tĩnh lặng đến phản kháng.",e11|e13,c15,-500000,,#8b8b83

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(xxd:*)",
+      "Bash(chmod +x:*)",
+      "WebSearch",
+      "Bash(npx ccstatusline@latest:*)",
+      "Bash($HOME/.local/bin/ccstatusline:*)",
+      "Bash(~/.local/bin/ccstatusline:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(lsof:*)",
+      "Bash(curl:*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "remote": {
+    "defaultEnvironmentId": "env_011CUeNRq3SpznNmtdGfTJ7a"
+  }
+}

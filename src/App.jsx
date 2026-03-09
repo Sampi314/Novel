@@ -1,0 +1,195 @@
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import * as d3 from 'd3';
+import Sidebar from './components/Sidebar';
+import MobileTabBar from './components/MobileTabBar';
+import FMGEmbed from './components/FMGEmbed';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ErasPage = lazy(() => import('./pages/ErasPage'));
+const LorePage = lazy(() => import('./pages/LorePage'));
+const FactionsPage = lazy(() => import('./pages/FactionsPage'));
+const CharactersPage = lazy(() => import('./pages/CharactersPage'));
+const LocationsPage = lazy(() => import('./pages/LocationsPage'));
+const EventsPage = lazy(() => import('./pages/EventsPage'));
+const StoryArcsPage = lazy(() => import('./pages/StoryArcsPage'));
+const BestiaryPage = lazy(() => import('./pages/BestiaryPage'));
+const LiteraturePage = lazy(() => import('./pages/LiteraturePage'));
+
+const PAGE_LOADING = (
+  <div style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    height: '100%', color: '#4a3518', fontFamily: "'EB Garamond', serif", fontSize: 15,
+    fontStyle: 'italic',
+  }}>
+    Đang tải...
+  </div>
+);
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [mapZoomTarget, setMapZoomTarget] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [theme, setTheme] = useState(() => localStorage.getItem('cng-theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('cng-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    document.documentElement.classList.add('theme-transitioning');
+    setTheme(t => t === 'dark' ? 'light' : 'dark');
+    setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 600);
+  };
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const navigateToMap = (x, y) => {
+    setMapZoomTarget({ x, y, _t: Date.now() });
+    setActiveTab('map');
+  };
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/data/world.json').then(r => r.json()),
+      fetch('/data/locations.csv').then(r => r.text()),
+      fetch('/data/characters.csv').then(r => r.text()),
+      fetch('/data/events.csv').then(r => r.text()),
+      fetch('/data/trade_routes.csv').then(r => r.text()),
+      fetch('/data/story_arcs.csv').then(r => r.text()),
+      fetch('/data/sub_races.csv').then(r => r.text()),
+    ]).then(([world, locCsv, charCsv, evCsv, trCsv, arcCsv, srCsv]) => {
+      const locations = d3.csvParse(locCsv).map(l => ({
+        ...l,
+        x: +l.x, y: +l.y,
+        era_founded: +l.era_founded || 0,
+        era_destroyed: l.era_destroyed === '' || l.era_destroyed == null ? null : +l.era_destroyed,
+        power: +l.power || 0,
+        pop: +l.population || 0,
+        desc: l.description || '',
+      }));
+      const characters = d3.csvParse(charCsv).map(c => ({
+        ...c,
+        power: +c.power || 0,
+        era_start: +c.era_start || 0,
+        era_end: c.era_end === '' || c.era_end == null ? null : +c.era_end,
+        journey: c.journey ? c.journey.split('|') : [],
+      }));
+      const events = d3.csvParse(evCsv).map(row => ({ ...row, year: +row.year, x: +row.x, y: +row.y }));
+      const tradeRoutes = d3.csvParse(trCsv).map(r => ({
+        ...r,
+        era_start: +r.era_start,
+        era_end: r.era_end === '' ? null : +r.era_end,
+        pts: r.waypoints.split('|').map(w => w.split(':').map(Number)),
+      }));
+      const storyArcs = d3.csvParse(arcCsv).map(a => ({
+        ...a,
+        era_start: +a.era_start || 0,
+        era_end: a.era_end === '' || a.era_end == null ? null : +a.era_end,
+        events: a.events ? a.events.split('|') : [],
+        characters: a.characters ? a.characters.split('|') : [],
+      }));
+      const subRaces = d3.csvParse(srCsv).map(sr => ({
+        ...sr,
+        rank: +sr.rank || 0,
+      }));
+
+      setData({
+        worldData: world,
+        locations,
+        characters,
+        events,
+        tradeRoutes,
+        storyArcs,
+        subRaces,
+        factions: world.factions || [],
+        fauna: world.fauna || [],
+        divineSites: world.divineSites || [],
+        eras: world.eras || [],
+        territories: world.territories || [],
+        leyLines: world.leyLines || [],
+        rivers: world.rivers || [],
+        creation: world.creation || {},
+        linhKhi: world.linhKhi || {},
+        powerSystem: world.powerSystem || {},
+        raceOrigins: world.raceOrigins || {},
+        novelStyle: world.novelStyle || {},
+      });
+      setLoading(false);
+    }).catch(err => {
+      console.error('Failed to load world data:', err);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{
+        width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg)', color: 'var(--gold)',
+      }}>
+        <div style={{ textAlign: 'center', animation: 'fadeIn 1s ease both' }}>
+          <div style={{
+            fontFamily: "'Playfair Display', 'Noto Serif TC', serif",
+            fontSize: 36,
+            fontWeight: 700,
+            letterSpacing: 6,
+            marginBottom: 16,
+            textShadow: '0 0 40px rgba(196,163,90,0.3)',
+          }}>固 元 界</div>
+          <div style={{
+            fontFamily: "'EB Garamond', serif",
+            fontSize: 15,
+            color: '#6a5a3a',
+            fontStyle: 'italic',
+            animation: 'breathe 2s ease-in-out infinite',
+          }}>Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const renderPage = () => {
+    if (!data) return null;
+    switch (activeTab) {
+      case 'home':       return <HomePage data={data} onNavigate={setActiveTab} />;
+      case 'eras':       return <ErasPage data={data} onNavigate={setActiveTab} />;
+      case 'lore':       return <LorePage data={data} />;
+      case 'factions':   return <FactionsPage data={data} onNavigate={setActiveTab} />;
+      case 'characters': return <CharactersPage data={data} onNavigate={setActiveTab} onMapNavigate={navigateToMap} />;
+      case 'locations':  return <LocationsPage data={data} onNavigate={setActiveTab} onMapNavigate={navigateToMap} />;
+      case 'events':     return <EventsPage data={data} onNavigate={setActiveTab} onMapNavigate={navigateToMap} />;
+      case 'arcs':       return <StoryArcsPage data={data} onNavigate={setActiveTab} />;
+      case 'bestiary':   return <BestiaryPage data={data} />;
+      case 'literature': return <LiteraturePage data={data} />;
+      default:           return null;
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
+      {!isMobile && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onToggleTheme={toggleTheme} />}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', paddingBottom: isMobile ? 52 : 0 }}>
+        {/* Map stays mounted, hidden via display */}
+        <div style={{ width: '100%', height: '100%', display: activeTab === 'map' ? 'block' : 'none' }}>
+          <FMGEmbed theme={theme} mapZoomTarget={mapZoomTarget} onNavigate={setActiveTab} />
+        </div>
+        {/* Other pages mount/unmount with slide-up transition */}
+        {activeTab !== 'map' && (
+          <div key={activeTab} className="page-transition" style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+            <Suspense fallback={PAGE_LOADING}>
+              {renderPage()}
+            </Suspense>
+          </div>
+        )}
+      </div>
+      {isMobile && <MobileTabBar activeTab={activeTab} onTabChange={setActiveTab} />}
+    </div>
+  );
+}

@@ -1,0 +1,120 @@
+{
+  "creation": {
+    "type": "natural",
+    "description": "Cố Nguyên Giới hình thành tự nhiên, không có thần sáng tạo. Thế giới sinh ra từ sự vận động của nguyên lực — hỗn mang ngưng tụ thành đất trời, linh khí tản ra khắp nơi.",
+    "beliefs": "Mỗi tộc có thần thoại sáng tạo riêng, nhưng tất cả đều 'sai' — thế giới tự hình thành, không ai tạo ra. Các thần thoại phản ánh văn hóa và nguyện vọng của từng tộc hơn là sự thật."
+  },
+  "linhKhi": {
+    "description": "Linh khí (靈氣) tràn ngập khắp nơi trong Cố Nguyên Giới — trong đất, nước, không khí, sinh vật. Mật độ linh khí khác nhau tùy vùng, tạo nên vùng đất linh (qi cao) và vùng đất thường.",
+    "han": "靈氣"
+  },
+  "powerSystem": {
+    "description": "Linh khí là nguồn năng lượng chung của Cố Nguyên Giới. Mỗi tộc hấp thu linh khí theo cách riêng, tạo nên nguồn lực đặc thù.",
+    "sharedSource": {
+      "name": "Linh Khí",
+      "han": "靈氣",
+      "description": "Năng lượng tràn ngập khắp nơi — trong đất, nước, không khí, sinh vật. Mọi tộc đều có thể hấp thu linh khí để tu luyện."
+    },
+    "sources": {
+      "Long Tộc": {"source": "Long Nguyên (龍元)", "description": "Nguyên lực trong huyết mạch rồng, sinh ra đã có. Càng thuần chủng càng mạnh — Thiên Long Chủng đứng đỉnh. Nhánh không thuần có thể hấp thụ huyết mạch thuần chủng để tiến hóa."},
+      "Vũ Tộc": {"source": "Phượng Hoàng Huyết Mạch (鳳凰血脈)", "description": "Huyết mạch lửa tái sinh. Phượng Hoàng thuần chủng có thể niết bàn tái sinh nhưng phải trả giá bằng tu vi hoặc ký ức."},
+      "Trùng Tộc": {"source": "Trùng Nguyên (蟲元)", "description": "Bản năng tiến hóa, sức mạnh phụ thuộc loài. Loài quý hiếm như Thiên Tằm, Hoàng Phong cực mạnh."},
+      "Nhân Tộc": {"source": "Tu Luyện (修煉)", "description": "Không có huyết mạch đặc biệt — sức mạnh hoàn toàn từ tu luyện. Có thể học pháp môn tộc khác nhưng hạn chế. Tỷ lệ tu sĩ thay đổi theo thời đại."},
+      "Yêu Tộc": {"source": "Yêu Nguyên (妖元)", "description": "Bản năng + linh khí kết hợp. Tiến hóa theo thời gian và tu luyện — đạt cảnh giới cao thì khai mở trí tuệ, hóa hình."},
+      "Cự Tộc": {"source": "Cự Lực (巨力)", "description": "Thể xác siêu cường kết hợp tu luyện linh khí. Thân thể khổng lồ là vũ khí tự nhiên."},
+      "Vi Tộc": {"source": "Vi Ẩn (微隱)", "description": "Ẩn thân, ảo thuật, thâm nhập. Thân nhỏ nhưng khả năng tàng hình cực kỳ tinh xảo."},
+      "Tinh Linh Tộc": {"source": "Nguyên Tố Chi Lực (元素之力)", "description": "Điều khiển nguyên tố tự nhiên tùy nhánh — Mộc, Hỏa, Thủy, Thổ, Phong. Không nhất thiết hình người. Tuổi thọ tùy nguyên tố."},
+      "Hải Tộc": {"source": "Thủy Nguyên (水元)", "description": "Sức mạnh từ đại dương, càng gần biển càng mạnh. Mỗi loài có thêm khả năng riêng — điện, độc, mực, giáp cứng."},
+      "Thạch Tộc": {"source": "Thạch Nguyên (石元)", "description": "Nguyên lực từ khoáng vật cấu thành cơ thể. Hấp thu khoáng vật quý để tiến hóa — kim cương mạnh hơn đá thường. Sinh sản bằng cách tự tách thân thể."}
+    },
+    "crossLearning": {
+      "description": "Các tộc có thể học hỏi nguồn sức mạnh của nhau, nhưng luôn kém bản gốc. Nhân Tộc có khả năng học chéo cao nhất.",
+      "timeline": "Khai Linh Kỷ (độc lập) → Thái Sơ Kỷ (manh nha) → Vạn Tộc Kỷ (giao lưu) → Chiến Loạn Kỷ (phổ biến) → Hiện Đại Kỷ (bình thường hóa)"
+    },
+    "cultivationRealms": {
+      "description": "Hệ thống cảnh giới tu luyện rõ ràng, được chuẩn hóa vào cuối Khai Linh Kỷ.",
+      "standardized": "Cuối Khai Linh Kỷ"
+    }
+  },
+  "raceOrigins": {
+    "description": "Mười tộc hoàn toàn độc lập về nguồn gốc — không có tộc nào sinh ra từ tộc khác. Mỗi tộc tự phát triển trước khi gặp nhau. Long Tộc và Vũ Tộc cùng xuất hiện trên đỉnh núi cao, dẫn đến thù truyền kiếp."
+  },
+  "novelStyle": {
+    "type": "mixed",
+    "description": "Kết hợp: sử thi (epic) cho đại chiến, nhân vật (character-driven) cho kịch tính, huyền bí (mystery) cho âm mưu và bí ẩn."
+  },
+  "eras": [
+    {"year":-500000,"name":"Khai Linh Kỷ","han":"開靈紀","accent":"#d4c98a","description":"Kỷ nguyên trước Thái Sơ, kéo dài hàng trăm ngàn năm. Thời kỳ vạn vật bắt đầu có linh trí — đá biết nghĩ, cây biết cảm, thú biết nói. Hệ thống cảnh giới tu luyện được chuẩn hóa vào cuối kỷ này."},
+    {"year":0,      "name":"Thái Sơ Kỷ",    "han":"太初紀","accent":"#c4a35a","description":"Thời kỳ sơ khai, mười tộc bắt đầu hình thành xã hội. Long Tộc và Vũ Tộc tranh chấp đỉnh núi, Nhân Tộc lập bộ lạc, các tộc manh nha giao lưu."},
+    {"year":40000,  "name":"Hỗn Độn Kỷ",    "han":"混沌紀","accent":"#9b7fba","description":"Thời kỳ hỗn loạn khi mười tộc va chạm. Long Tộc và Vũ Tộc đại chiến trên không, Nhân Tộc mở rộng lãnh thổ, Cự Tộc bị lôi kéo vào chiến tranh."},
+    {"year":80000,  "name":"Linh Nguyên Kỷ","han":"靈元紀","accent":"#5a9c6e","description":"Thời kỳ hoàng kim của linh khí, tu luyện đạt đỉnh cao. Các pháp môn, công pháp vĩ đại nhất được tạo ra trong kỷ này."},
+    {"year":130000, "name":"Vạn Tộc Kỷ",    "han":"萬族紀","accent":"#5a8cc4","description":"Thời kỳ giao lưu văn hóa, thương mại phát triển. Hải Tộc mở cảng giao thương, Vi Tộc bắt đầu bị phát hiện, Thạch Tộc hình thành thành trì."},
+    {"year":170000, "name":"Chiến Loạn Kỷ", "han":"戰亂紀","accent":"#c45a5a","description":"Đại chiến vạn tộc. Nhân Tộc khai thác Thạch Tộc, Trùng Tộc nổi dậy, Long-Vũ tổng quyết chiến. Mười tộc đều tham chiến."},
+    {"year":200000, "name":"Hiện Đại Kỷ",   "han":"現代紀","accent":"#c4a35a","description":"Thời kỳ tái thiết sau chiến tranh. Mười tộc học cách chung sống, liên minh hòa bình mong manh hình thành."}
+  ],
+  "territories": [
+    {"id":"t01","name":"Long Vực",             "han":"龍域",    "color":"#c4a35a","cx":2500,"cy":1800,"era_start":-500000,"era_end":null,  "pts":[[500,300],[4800,300],[5000,2500],[3500,3500],[500,3000]]},
+    {"id":"t02","name":"Nhân Tộc Trung Nguyên","han":"人族中原","color":"#5a8cc4","cx":5000,"cy":5000,"era_start":0,      "era_end":null,  "pts":[[3000,3500],[6500,3500],[7500,5500],[6500,7000],[3500,7000],[2500,5000]]},
+    {"id":"t03","name":"Yêu Giới Nam Vực",     "han":"妖界南域","color":"#9b7fba","cx":5000,"cy":8500,"era_start":-500000,"era_end":null,  "pts":[[1500,7500],[6500,7000],[8500,7500],[8000,9500],[4500,9800],[1500,9200]]},
+    {"id":"t04","name":"Đông Hải",             "han":"東海",    "color":"#5ab8c4","cx":8700,"cy":5000,"era_start":-500000,"era_end":null,  "pts":[[8000,2500],[9700,2500],[9700,8000],[8500,8500],[7500,6500],[7500,3500]]},
+    {"id":"t05","name":"Tinh Linh Cổ Lâm",     "han":"精靈古林","color":"#2ecc71","cx":1500,"cy":5500,"era_start":-500000,"era_end":null,  "pts":[[300,3500],[2500,3500],[3000,5000],[2500,7000],[1500,7500],[300,6500]]},
+    {"id":"t06","name":"Trùng Lâm Trạch",      "han":"蟲林澤", "color":"#6b8e23","cx":1500,"cy":8500,"era_start":-500000,"era_end":null,  "pts":[[300,7000],[1500,7500],[3000,8500],[2500,9700],[300,9700]]},
+    {"id":"t07","name":"Cự Nhân Nguyên",       "han":"巨人原", "color":"#b87333","cx":2500,"cy":4000,"era_start":0,      "era_end":null,  "pts":[[500,3000],[3500,3500],[3000,5000],[2500,5000],[500,4500]]},
+    {"id":"t08","name":"Thạch Giới",           "han":"石界",   "color":"#8b8b83","cx":6500,"cy":1800,"era_start":-500000,"era_end":null,  "pts":[[5000,300],[8000,300],[8000,2500],[7500,3500],[6500,3500],[5000,2500]]}
+  ],
+  "leyLines": [
+    {"id":"ll1","han":"天龍脈","name":"Thiên Long Mạch","pts":[[2500,1500],[3800,3000],[5000,5000],[6500,6800],[7800,8500]],"color":"#ffd700","dur":3.2},
+    {"id":"ll2","han":"地靈脈","name":"Địa Linh Mạch",  "pts":[[400,5000],[2500,5200],[5000,5000],[7500,5000],[9200,5000]],"color":"#90ee90","dur":4.1},
+    {"id":"ll3","han":"血天脈","name":"Huyết Thiên Mạch","pts":[[5000,5000],[5800,2500],[7200,1800],[8500,800]],            "color":"#ff6666","dur":2.8},
+    {"id":"ll4","han":"陰冥脈","name":"Âm Minh Mạch",   "pts":[[1000,9000],[3500,7500],[5000,5000],[6500,3500],[8500,2000]],"color":"#aa88ff","dur":3.7}
+  ],
+  "mistZones": [
+    {"x":2500,"y":1500,"rx":600,"ry":350,"dur":14,"dx":120,"dy":60, "op":0.18},
+    {"x":7200,"y":1800,"rx":500,"ry":280,"dur":11,"dx":-90,"dy":80, "op":0.15},
+    {"x":1800,"y":7200,"rx":700,"ry":400,"dur":16,"dx":100,"dy":-50,"op":0.13},
+    {"x":5000,"y":9200,"rx":550,"ry":300,"dur":13,"dx":-70,"dy":60, "op":0.14},
+    {"x":7800,"y":7500,"rx":450,"ry":250,"dur":10,"dx":80, "dy":-70,"op":0.20}
+  ],
+  "rivers": [
+    {"id":"r1","name":"Thiên Long Giang","han":"天龍江","rank":1,"pts":[[2800,800],[2900,1100],[3050,1500],[3200,1900],[3350,2300],[3500,2700],[3600,3000],[3500,3200]],"desc":"Sông lớn nhất phương bắc, bắt nguồn từ dãy Thiên Sơn chảy vào Linh Hồ."},
+    {"id":"r1a","name":"Thiên Long nhánh Đông","han":"天龍東支","rank":2,"parent":"r1","pts":[[4200,1200],[4100,1600],[3900,2000],[3700,2400],[3600,2800],[3600,3000]],"desc":"Nhánh đông hợp lưu với Thiên Long Giang."},
+    {"id":"r2","name":"Linh Hà","han":"靈河","rank":1,"pts":[[4500,3700],[4600,4100],[4700,4500],[4800,4900],[4900,5300],[5000,5700],[5100,6100],[5200,6500],[5300,6900],[5400,7200]],"desc":"Sông linh chảy từ Linh Hồ xuống phía nam qua trung nguyên."},
+    {"id":"r2a","name":"Linh Hà nhánh Tây","han":"靈河西支","rank":2,"parent":"r2","pts":[[3200,5600],[3600,5500],[4000,5400],[4400,5200],[4700,5100],[4900,5300]],"desc":"Nhánh tây của Linh Hà."},
+    {"id":"r3","name":"Tây Nguyên Giang","han":"西原江","rank":1,"pts":[[900,2200],[1100,2700],[1300,3200],[1500,3700],[1600,4200],[1700,4700],[1800,5200]],"desc":"Sông chính của Vi Tộc Tây Nguyên, chảy qua Thanh Trì."},
+    {"id":"r3a","name":"Tây Nguyên nhánh Nam","han":"西原南支","rank":2,"parent":"r3","pts":[[1200,6200],[1400,5800],[1500,5500],[1700,5100],[1800,5200]],"desc":"Nhánh nam hợp lưu với Tây Nguyên Giang."},
+    {"id":"r4","name":"Đông Lôi Giang","han":"東雷江","rank":1,"pts":[[7200,1000],[7100,1400],[7000,1800],[6900,2200],[6800,2600],[6750,3000],[6700,3400],[6700,3800],[6800,4200]],"desc":"Sông sấm phía đông, bắt nguồn từ Lôi Vân Đỉnh chảy vào Nguyệt Đàm."},
+    {"id":"r4a","name":"Đông Lôi nhánh Bắc","han":"東雷北支","rank":2,"parent":"r4","pts":[[8200,1800],[7900,2000],[7600,2200],[7300,2400],[7000,2600],[6900,2800],[6800,3000]],"desc":"Nhánh bắc chảy từ vùng sa mạc phía đông."},
+    {"id":"r5","name":"Huyền Lưu","han":"玄流","rank":1,"pts":[[7400,4700],[7500,5100],[7500,5500],[7400,5900],[7200,6300],[7100,6500]],"desc":"Dòng chảy huyền bí từ Nguyệt Đàm xuống Huyền Trạch."},
+    {"id":"r6","name":"Nam Phong Giang","han":"南風江","rank":1,"pts":[[5400,7200],[5600,7500],[5700,7800],[5800,8100],[5800,8200]],"desc":"Sông gió nam chảy từ Vân Trì qua vùng nhiệt đới xuống Hỏa Đàm."},
+    {"id":"r6a","name":"Nam Phong nhánh Đông","han":"南風東支","rank":2,"parent":"r6","pts":[[6800,7400],[6500,7500],[6200,7600],[5900,7700],[5700,7800]],"desc":"Nhánh đông chảy từ Huyền Trạch hợp lưu."},
+    {"id":"r7","name":"Cổ Trạch Khê","han":"古澤溪","rank":2,"pts":[[2200,3200],[2000,3400],[1800,3600],[1600,3800]],"desc":"Suối nhỏ chảy từ rừng vào Cổ Trạch."},
+    {"id":"r8","name":"Tuyết Khê","han":"雪溪","rank":2,"pts":[[3400,800],[3300,1000],[3200,1200],[3100,1300]],"desc":"Suối tuyết tan từ cực bắc chảy vào Tuyết Hồ."},
+    {"id":"r9","name":"Hải Khẩu Giang","han":"海口江","rank":1,"pts":[[7100,6700],[7400,7000],[7600,7300],[7800,7600],[7900,7800]],"desc":"Sông chảy từ Huyền Trạch ra biển đông nam."},
+    {"id":"r10","name":"Vân Khê","han":"雲溪","rank":2,"pts":[[3800,6800],[4000,7000],[4100,7100],[4200,7200]],"desc":"Suối mây chảy từ phía tây vào Vân Trì."}
+  ],
+  "tectonic": [
+    {"id":"p1","han":"北龍板","name":"Bắc Long Bản","color":"#8b6914","cx":3000,"cy":2000,"pts":[[300,300],[5000,300],[5200,2000],[5000,5000],[2500,4500],[800,3500],[300,2000]],"drift":[-0.15,-0.2],"desc":"Mảng kiến tạo phía bắc chứa Long Vực, sẽ trôi về tây bắc."},
+    {"id":"p2","han":"東雷板","name":"Đông Lôi Bản","color":"#6b4a14","cx":7500,"cy":2500,"pts":[[5200,300],[9700,300],[9700,4500],[9200,5000],[6500,4800],[5000,5000],[5200,2000]],"drift":[0.2,-0.1],"desc":"Mảng phía đông chứa Sa Mạc Lôi Vân, sẽ tách về đông bắc."},
+    {"id":"p3","han":"南妖板","name":"Nam Yêu Bản","color":"#6b3a6b","cx":5500,"cy":8000,"pts":[[3500,7000],[5000,5000],[6500,4800],[9200,5000],[9700,9700],[5000,9700],[3500,9200]],"drift":[0.1,0.2],"desc":"Mảng phía nam chứa Yêu Giới, sẽ trôi về đông nam."},
+    {"id":"p4","han":"西微板","name":"Tây Vi Bản","color":"#3a6b3a","cx":1500,"cy":5500,"pts":[[300,2000],[800,3500],[2500,4500],[5000,5000],[3500,7000],[1500,7500],[300,6500]],"drift":[-0.2,0.1],"desc":"Mảng tây chứa Vi Tộc, sẽ tách về tây nam."},
+    {"id":"p5","han":"中元板","name":"Trung Nguyên Bản","color":"#4a4a8b","cx":5000,"cy":5000,"pts":[[2500,4500],[5200,2000],[5000,5000]],"drift":[0,0],"desc":"Mảnh trung tâm nhỏ — nơi giao hội của tất cả mảng, sẽ là đảo giữa đại dương tương lai."}
+  ],
+  "factions": [
+    {"id":"f01","name":"Thiên Long Cổ Tộc","han":"天龍古族","color":"#c4a35a","capital":"l02","territory":"t01","era_start":-500000,"era_end":null,"description":"Bộ lạc nguyên sơ của Long Tộc, sống theo gia đình trên đỉnh núi. Cá lớn nuốt cá bé — Thiên Long Chủng thuần huyết đứng đỉnh, các nhánh không thuần phải hấp thụ huyết mạch để tiến hóa.","relations":[{"target":"f02","type":"enemy"},{"target":"f06","type":"ally"},{"target":"f04","type":"neutral"}]},
+    {"id":"f02","name":"Vạn Vũ Du Tộc","han":"萬羽遊族","color":"#e85d3a","capital":"l07","territory":null,"era_start":-500000,"era_end":null,"description":"Chim thần du mục trên bầu trời, không lãnh thổ cố định. Phượng Hoàng thuần chủng đứng đỉnh với khả năng niết bàn tái sinh — nhưng phải trả giá bằng tu vi hoặc ký ức. Kẻ thù truyền kiếp của Long Tộc.","relations":[{"target":"f01","type":"enemy"},{"target":"f08","type":"ally"}]},
+    {"id":"f03","name":"Trùng Lâm Liên Sào","han":"蟲林聯巢","color":"#6b8e23","capital":"l08","territory":"t06","era_start":-500000,"era_end":null,"description":"Côn trùng khổng lồ cư trú trong rừng sâu và đầm lầy. Bị vạn tộc khinh thường nhưng loài quý hiếm như Thiên Tằm, Hoàng Phong sánh ngang cường giả. Có loài sống tổ đàn, có loài độc lập.","relations":[{"target":"f08","type":"ally"},{"target":"f04","type":"enemy"}]},
+    {"id":"f04","name":"Nhân Tộc Vương Triều","han":"人族王朝","color":"#5a8cc4","capital":"l01","territory":"t02","era_start":0,"era_end":null,"description":"Từ bộ lạc phát triển lên vương triều, song song tồn tại gia tộc và tông môn. Đông nhất, xuất hiện khắp nơi. Có thể học pháp môn tộc khác nhưng kém bản gốc.","relations":[{"target":"f05","type":"complex"},{"target":"f06","type":"exploit"},{"target":"f10","type":"exploit"},{"target":"f03","type":"enemy"}]},
+    {"id":"f05","name":"Yêu Tộc Vương Đình","han":"妖族王庭","color":"#9b7fba","capital":"l12","territory":"t03","era_start":-500000,"era_end":null,"description":"Vạn thú khai linh, tu luyện thành tinh. Xã hội phát triển giống Nhân Tộc với vương triều và tông môn riêng. Quan hệ với Nhân Tộc phức tạp — vừa kẻ thù vừa đồng minh tùy thời đại.","relations":[{"target":"f04","type":"complex"},{"target":"f01","type":"neutral"},{"target":"f08","type":"neutral"}]},
+    {"id":"f06","name":"Cự Nhân Bộ Lạc","han":"巨人部落","color":"#b87333","capital":"l09","territory":"t07","era_start":0,"era_end":null,"description":"Người khổng lồ thô kệch nhưng có văn hóa riêng — giỏi rèn đúc và điêu khắc đá. Trí tuệ không cao nên thường bị các tộc khác lợi dụng làm lính đánh thuê.","relations":[{"target":"f01","type":"ally"},{"target":"f04","type":"vassal"}]},
+    {"id":"f07","name":"Vi Tộc Ẩn Thôn","han":"微族隱村","color":"#5ac48a","capital":"l16","territory":null,"era_start":-500000,"era_end":null,"description":"Người tí hon 5-30cm ẩn mình khắp Cố Nguyên Giới. Giỏi ẩn thân và ảo thuật, sống thành cộng đồng nhỏ rải rác. Biết mọi bí mật của thiên hạ nhưng hầu hết các tộc không biết chúng tồn tại.","relations":[]},
+    {"id":"f08","name":"Tinh Linh Vương Quốc","han":"精靈王國","color":"#2ecc71","capital":"l26","territory":"t05","era_start":-500000,"era_end":null,"description":"Thực thể nguyên tố sinh ra từ tự nhiên — không nhất thiết hình người. Chia thành nhánh Mộc, Hỏa, Thủy, Thổ, Phong. Sống trong vương quốc rừng cổ, bảo vệ tự nhiên là tín ngưỡng tối cao.","relations":[{"target":"f02","type":"ally"},{"target":"f03","type":"ally"},{"target":"f04","type":"enemy"}]},
+    {"id":"f09","name":"Hải Tộc Liên Bang","han":"海族聯邦","color":"#5ab8c4","capital":"l15","territory":"t04","era_start":-500000,"era_end":null,"description":"Vạn loài dưới đại dương khai linh. Liên bang hải vực, mỗi vùng biển một chúa tể. Giao thương với các tộc ven bờ nhưng yếu đi khi rời xa đại dương.","relations":[{"target":"f04","type":"trade"},{"target":"f05","type":"neutral"}]},
+    {"id":"f10","name":"Thạch Tộc Thành Trì","han":"石族城池","color":"#8b8b83","capital":null,"territory":"t08","era_start":-500000,"era_end":null,"description":"Sinh vật đá khoáng tự tách phân thân để sinh sản. Ban đầu rải rác tĩnh lặng, dần tập trung thành bộ lạc và xây thành trì trong lòng núi. Thường bị các tộc khác xâm lấn khai thác khoáng sản.","relations":[{"target":"f04","type":"enemy"},{"target":"f06","type":"neutral"}]}
+  ],
+  "fauna": [],
+  "divineSites": [
+    {"id":"d02","name":"Địa Mạch Căn Nguyên","han":"地脈根源","x":5000,"y":9800,"type":"earth","era_start":0,"era_end":null,"glow":"#e6ffe6","description":"Điểm gốc của toàn bộ địa mạch đại lục, năng lượng đất trời hội tụ nơi đây."},
+    {"id":"d03","name":"Hư Không Thánh Địa","han":"虛空聖地","x":200,"y":5000,"type":"void","era_start":0,"era_end":null,"glow":"#e6e6ff","description":"Nơi không gian bị xé rách, cánh cửa dẫn đến vũ trụ song song vô tận."},
+    {"id":"d05","name":"Nguyệt Cung Thánh Điện","han":"月宮聖殿","x":8500,"y":1200,"type":"lunar","era_start":40000,"era_end":null,"glow":"#e6f0ff","description":"Cung điện trăng huyền ảo trên đỉnh núi cao nhất phía đông, chỉ hiện ra vào đêm trăng tròn."}
+  ]
+}

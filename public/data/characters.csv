@@ -1,0 +1,16 @@
+id,name,han,faction,role,qi_affinity,power,era_start,era_end,location_id,journey
+c01,Thiên Long Đế,天龍帝,f01,Tộc Trưởng,tối cao,5,-500000,,l02,l02|l19|l13
+c02,Bạch Long Nữ,白龍女,f01,Công Chúa,cao,4,80000,,l19,l02|l19|l01
+c03,Phượng Hoàng Vương,鳳凰王,f02,Vương,tối cao,5,-500000,,l07,l07|l17|l02
+c04,Trùng Hoàng,蟲皇,f03,Hoàng,cao,4,0,,l08,l08|l06|l18
+c05,Nhân Hoàng Đế,人皇帝,f04,Hoàng Đế,tối cao,5,40000,,l01,l01|l11|l07|l17
+c06,Thiên Kiếm Thánh,天劍聖,f04,Kiếm Thánh,cao,5,40000,,l01,l11|l01|l07|l28
+c07,Thiết Quyền Đại Tướng,鐵拳大將,f04,Đại Tướng,trung,4,40000,170000,l01,l01|l11|l22|l04
+c08,Cửu Vĩ Hồ Vương,九尾狐王,f05,Yêu Vương,cao,5,0,,l12,l08|l12|l18
+c09,Mãng Xà Đế,蟒蛇帝,f05,Xà Đế,âm,4,80000,,l18,l03|l12|l18|l27
+c10,Cự Nhân Tộc Trưởng,巨人族長,f06,Tộc Trưởng,trung,4,0,,l09,l09|l01|l22
+c11,Vi Ẩn Lão Nhân,微隱老人,f07,Trưởng Lão,cao,3,0,,l16,l16|l06|l20|l01
+c12,Mộc Linh Nữ Vương,木靈女王,f08,Nữ Vương,tối cao,5,-500000,,l26,l26|l06|l08
+c13,Hải Hoàng,海皇,f09,Hải Vương,tối cao,5,-500000,,l15,l15|l05|l10
+c14,Ngọc Hải Công Chúa,玉海公主,f09,Công Chúa,cao,4,130000,,l10,l15|l10|l24|l30
+c15,Thạch Cổ Tôn,石古尊,f10,Cổ Tôn,cao,4,-500000,,l14,l14|l07|l04

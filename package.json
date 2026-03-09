@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "dev": "concurrently \"vite\" \"cd fmg && npm run dev\"",
+    "dev:app": "vite",
+    "dev:fmg": "cd fmg && npm run dev",
+    "build": "vite build && cd fmg && npm run build && cp -r fmg/dist dist/fmg",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.4",
+    "concurrently": "^9.2.1",
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0"
+  }
+}
