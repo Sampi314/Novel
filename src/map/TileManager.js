@@ -71,13 +71,15 @@ export class TileManager {
       imageData.height
     );
 
-    // Paint onto an OffscreenCanvas so we can use drawImage later
-    const offscreen = new OffscreenCanvas(TILE_SIZE, TILE_SIZE);
-    const octx = offscreen.getContext('2d');
-    octx.putImageData(reconstructed, 0, 0);
+    // Paint onto a regular canvas (OffscreenCanvas has poor iOS Safari support)
+    const bitmap = document.createElement('canvas');
+    bitmap.width = TILE_SIZE;
+    bitmap.height = TILE_SIZE;
+    const bctx = bitmap.getContext('2d');
+    bctx.putImageData(reconstructed, 0, 0);
 
     // Store in cache
-    this.cache.set(req.zoom, req.tx, req.ty, req.eraIndex, offscreen);
+    this.cache.set(req.zoom, req.tx, req.ty, req.eraIndex, bitmap);
 
     // Notify caller that a tile is ready (typically triggers canvas redraw)
     if (req.onReady) {

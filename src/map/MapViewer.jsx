@@ -155,6 +155,9 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
 
     const handleResize = () => {
       const rect = canvas.parentElement.getBoundingClientRect();
+      // Skip when hidden (display:none → 0x0)
+      if (rect.width === 0 || rect.height === 0) return;
+
       const dpr = window.devicePixelRatio || 1;
 
       canvas.width = rect.width * dpr;
@@ -162,16 +165,24 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
 
-      // Update viewport scale: how many screen pixels per world unit
+      // Update viewport dimensions to match screen aspect ratio
       const vp = viewportRef.current;
+      vp.height = vp.width * (rect.height / rect.width);
       vp.scale = rect.width / vp.width;
 
       draw();
     };
 
+    // ResizeObserver fires when element transitions from display:none to visible
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(canvas.parentElement);
+
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
   }, [draw]);
 
   // ---------------------------------------------------------------------------
