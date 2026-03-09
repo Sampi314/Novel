@@ -1,0 +1,1215 @@
+/*
+ * Xianxia Dark Theme for Fantasy Map Generator
+ * A dark, gold-accented theme inspired by ancient Chinese cultivation fantasy
+ * Colors: near-black blue background, warm gold accents, parchment text
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=EB+Garamond:wght@400;500;600&family=Noto+Serif+TC:wght@400;600&display=swap');
+
+/* ===== CSS Custom Properties ===== */
+:root {
+  --xianxia-bg: #05080f;
+  --xianxia-panel: rgba(10, 14, 24, 0.95);
+  --xianxia-input-bg: rgba(10, 14, 24, 0.7);
+  --xianxia-gold: #c4a35a;
+  --xianxia-gold-bright: #e8c96a;
+  --xianxia-gold-dim: #4a3518;
+  --xianxia-border: #1e1608;
+  --xianxia-text: #d4c4a0;
+  --xianxia-text-dim: #6a5a3a;
+  --xianxia-text-muted: #8a7a5a;
+  --xianxia-accent-red: #c45a5a;
+  --xianxia-accent-blue: #5a8cc4;
+  --xianxia-accent-green: #5ac48a;
+  --xianxia-accent-purple: #9b7fba;
+  --xianxia-font-body: 'EB Garamond', Georgia, serif;
+  --xianxia-font-heading: 'Playfair Display', Georgia, serif;
+  --xianxia-font-cjk: 'Noto Serif TC', serif;
+
+  /* Override FMG's CSS custom properties */
+  --bg-opacity: 0.92 !important;
+  --bg-main: hsla(230, 40%, 8%, 0.92) !important;
+  --bg-lighter: hsla(230, 35%, 11%, 0.92) !important;
+  --bg-light: hsla(230, 30%, 14%, 0.92) !important;
+  --light-solid: hsl(230, 25%, 18%) !important;
+  --dark-solid: #1e1608 !important;
+  --header: hsla(38, 45%, 25%, 0.9) !important;
+  --header-active: hsla(38, 50%, 18%, 0.95) !important;
+  --bg-disabled: hsla(230, 20%, 12%, 0.7) !important;
+  --bg-dialogs: rgba(10, 14, 24, 0.97) !important;
+  --monospace: 'EB Garamond', Consolas, monospace !important;
+  --serif: 'Playfair Display', Georgia, serif !important;
+  --sans-serif: 'EB Garamond', Helvetica, Arial, sans-serif !important;
+}
+
+
+/* ===== Body & Base ===== */
+body {
+  background-color: var(--xianxia-bg) !important;
+  color: var(--xianxia-text) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+/* ===== SVG Map Background ===== */
+#map {
+  background-color: #030509 !important;
+}
+
+
+/* ===== Loading Screen ===== */
+#loading > #loading-typography {
+  color: var(--xianxia-gold) !important;
+  text-shadow: 0px 1px 8px rgba(196, 163, 90, 0.4) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+#loading > #loading-rose > use {
+  stroke: var(--xianxia-gold-dim) !important;
+}
+
+#titleName,
+#title {
+  color: var(--xianxia-gold-bright) !important;
+}
+
+#versionText {
+  color: var(--xianxia-text-muted) !important;
+}
+
+#loading-text {
+  color: var(--xianxia-text-dim) !important;
+}
+
+#mapOverlay {
+  background: rgba(5, 8, 15, 0.7) !important;
+  color: var(--xianxia-gold) !important;
+  text-shadow: 0px 1px 6px rgba(196, 163, 90, 0.3) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+
+/* ===== Main Options Panel ===== */
+#optionsContainer {
+  color: var(--xianxia-text) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+#collapsible {
+  border: 1px solid var(--xianxia-border) !important;
+}
+
+#options {
+  background: var(--xianxia-panel) !important;
+  border-color: var(--xianxia-border) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  font-family: var(--xianxia-font-body) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#options input,
+#options select,
+#options button {
+  font-family: var(--xianxia-font-body) !important;
+}
+
+#options p {
+  color: var(--xianxia-gold) !important;
+}
+
+#options .tip {
+  color: var(--xianxia-text-muted) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+#options i {
+  color: var(--xianxia-text-dim) !important;
+}
+
+#optionsContent span {
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Tabs ===== */
+.tab {
+  border-bottom-color: var(--xianxia-border) !important;
+}
+
+button.options {
+  background-color: rgba(10, 14, 24, 0.8) !important;
+  color: var(--xianxia-text-dim) !important;
+  border: none !important;
+  font-family: var(--xianxia-font-body) !important;
+  transition: all 0.3s ease !important;
+}
+
+button.options:hover {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold) !important;
+}
+
+button.active,
+button.options.active {
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+div.tab > button#optionsHide {
+  color: var(--xianxia-text-dim) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+div.tab > button#optionsHide:hover {
+  color: var(--xianxia-gold) !important;
+}
+
+#optionsTrigger {
+  background-color: rgba(10, 14, 24, 0.9) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Tab Content ===== */
+.tabcontent {
+  color: var(--xianxia-text) !important;
+}
+
+.tabcontent button {
+  background-color: rgba(30, 22, 8, 0.5) !important;
+  color: var(--xianxia-text) !important;
+  border: 1px solid var(--xianxia-border) !important;
+  font-family: var(--xianxia-font-body) !important;
+  transition: all 0.2s ease !important;
+}
+
+.tabcontent button:hover {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.tabcontent button.pressed {
+  background-color: rgba(196, 163, 90, 0.25) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+.tabcontent li {
+  background-color: rgba(10, 14, 24, 0.6) !important;
+  color: var(--xianxia-text) !important;
+  border: 1px solid var(--xianxia-border) !important;
+}
+
+.tabcontent li:hover {
+  box-shadow: 0 0 4px 1px rgba(196, 163, 90, 0.2) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.tabcontent li.buttonoff {
+  background-color: rgba(10, 14, 24, 0.3) !important;
+  color: var(--xianxia-text-dim) !important;
+}
+
+
+/* ===== Buttons (Global) ===== */
+button,
+.button,
+input[type="button"],
+input[type="submit"] {
+  background-color: rgba(30, 22, 8, 0.6) !important;
+  color: var(--xianxia-text) !important;
+  border: 1px solid var(--xianxia-border) !important;
+  font-family: var(--xianxia-font-body) !important;
+  transition: all 0.2s ease !important;
+}
+
+button:hover,
+.button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  box-shadow: 0 0 6px rgba(196, 163, 90, 0.1) !important;
+}
+
+button:active,
+.button:active {
+  background-color: rgba(196, 163, 90, 0.25) !important;
+  transform: translateY(1px) !important;
+}
+
+button:disabled,
+.button:disabled {
+  opacity: 0.4 !important;
+  color: var(--xianxia-text-dim) !important;
+}
+
+/* Sticked bar buttons */
+#sticked button {
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--xianxia-text-dim) !important;
+}
+
+#sticked button:hover {
+  color: var(--xianxia-gold) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Exit customization */
+#exitCustomization > div {
+  background: var(--xianxia-border) !important;
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Form Inputs ===== */
+input,
+select,
+textarea {
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+  border: 1px solid var(--xianxia-border) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--xianxia-gold-dim) !important;
+  outline: 1px solid rgba(196, 163, 90, 0.3) !important;
+  box-shadow: 0 0 4px rgba(196, 163, 90, 0.1) !important;
+}
+
+input:read-only {
+  color: var(--xianxia-text-muted) !important;
+}
+
+form input:invalid {
+  outline-color: var(--xianxia-accent-red) !important;
+}
+
+select {
+  border-top-color: var(--xianxia-border) !important;
+}
+
+/* Options panel inputs */
+#options input[type="text"],
+#options input[type="number"] {
+  background-color: transparent !important;
+  color: var(--xianxia-text) !important;
+  border: none !important;
+}
+
+#options input[type="number"]:hover {
+  outline-color: var(--xianxia-gold-dim) !important;
+}
+
+#options input.paired,
+#options input.long {
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#options select {
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+  border: none !important;
+}
+
+/* Color inputs */
+input[type="color"] {
+  border-color: var(--xianxia-border) !important;
+  background-color: var(--xianxia-input-bg) !important;
+}
+
+
+/* ===== Range Sliders ===== */
+#options input[type="range"] {
+  background: transparent !important;
+}
+
+#options input[type="range"]::-webkit-slider-thumb {
+  background: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  box-shadow: 0 0 4px rgba(196, 163, 90, 0.3) !important;
+}
+
+#options input[type="range"]::-moz-range-thumb {
+  background: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  box-shadow: 0 0 4px rgba(196, 163, 90, 0.3) !important;
+}
+
+#options input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--xianxia-gold-dim) !important;
+}
+
+#options input[type="range"]::-moz-range-track {
+  background: var(--xianxia-gold-dim) !important;
+}
+
+.ui-dialog input[type="range"] {
+  background: var(--xianxia-gold-dim) !important;
+}
+
+.ui-dialog input[type="range"]::-webkit-slider-thumb {
+  background: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.ui-dialog input[type="range"]::-moz-range-thumb {
+  background: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+
+/* ===== Checkboxes ===== */
+input[type="checkbox"].native {
+  accent-color: var(--xianxia-gold) !important;
+}
+
+.checkbox + .checkbox-label:before {
+  background: var(--xianxia-input-bg) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.checkbox:checked + .checkbox-label:before {
+  color: var(--xianxia-gold-bright) !important;
+  background: rgba(196, 163, 90, 0.15) !important;
+}
+
+input[type="radio"] {
+  accent-color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== jQuery UI Dialogs ===== */
+.ui-widget.ui-widget-content {
+  border-color: var(--xianxia-border) !important;
+  background: var(--xianxia-panel) !important;
+  color: var(--xianxia-text) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 1px rgba(196, 163, 90, 0.2) !important;
+}
+
+.ui-widget-content {
+  background: var(--xianxia-panel) !important;
+  color: var(--xianxia-text) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+.ui-widget-content a {
+  color: var(--xianxia-gold) !important;
+}
+
+.ui-widget-header {
+  background: rgba(196, 163, 90, 0.15) !important;
+  border-bottom-color: var(--xianxia-border) !important;
+  color: var(--xianxia-gold-bright) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+.ui-widget-header a {
+  color: var(--xianxia-gold) !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+  background: rgba(196, 163, 90, 0.12) !important;
+  border-bottom: 1px solid var(--xianxia-border) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+.ui-dialog .ui-dialog-title {
+  color: var(--xianxia-gold-bright) !important;
+}
+
+.ui-dialog .ui-dialog-titlebar button {
+  color: var(--xianxia-text-dim) !important;
+}
+
+.ui-dialog .ui-dialog-titlebar button:hover {
+  color: var(--xianxia-gold) !important;
+}
+
+.ui-dialog .ui-dialog-content {
+  color: var(--xianxia-text) !important;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+  border-top-color: var(--xianxia-border) !important;
+  background: rgba(10, 14, 24, 0.5) !important;
+}
+
+.ui-dialog button.pressed {
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  box-shadow: inset 1px 1px 0 0 rgba(196, 163, 90, 0.1) !important;
+}
+
+.ui-dialog input[type="number"] {
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+  border: 1px solid var(--xianxia-border) !important;
+}
+
+.ui-dialog .disabled {
+  opacity: 0.3 !important;
+}
+
+/* jQuery UI States */
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default,
+.ui-button {
+  background: rgba(30, 22, 8, 0.5) !important;
+  color: var(--xianxia-text) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+  background: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+  background: rgba(196, 163, 90, 0.25) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border-color: var(--xianxia-gold) !important;
+}
+
+.ui-state-highlight,
+.ui-widget-content .ui-state-highlight,
+.ui-widget-header .ui-state-highlight {
+  background: rgba(196, 163, 90, 0.12) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+.ui-state-error,
+.ui-widget-content .ui-state-error,
+.ui-widget-header .ui-state-error {
+  background: rgba(196, 90, 90, 0.15) !important;
+  color: var(--xianxia-accent-red) !important;
+  border-color: rgba(196, 90, 90, 0.3) !important;
+}
+
+.ui-widget-overlay {
+  background: rgba(5, 8, 15, 0.7) !important;
+}
+
+
+/* ===== Dialogs & Panels ===== */
+#dialogs {
+  background-color: var(--xianxia-panel) !important;
+}
+
+.dialog {
+  color: var(--xianxia-text) !important;
+}
+
+#prompt {
+  background-color: var(--xianxia-panel) !important;
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+#promptText {
+  color: var(--xianxia-gold) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+
+/* ===== Alert Message ===== */
+#alertMessage {
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Error Box ===== */
+#errorBox {
+  color: var(--xianxia-accent-red) !important;
+  background-color: rgba(196, 90, 90, 0.1) !important;
+  border-color: rgba(196, 90, 90, 0.3) !important;
+}
+
+
+/* ===== Announcements ===== */
+.announcement {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+
+/* ===== Tooltip ===== */
+#tooltip {
+  color: var(--xianxia-gold-bright) !important;
+  text-shadow: 0 0 8px rgba(196, 163, 90, 0.4) !important;
+  background: linear-gradient(0.1turn, transparent, rgba(196, 163, 90, 0.15), transparent) !important;
+}
+
+
+/* ===== Notes Panel ===== */
+#notes {
+  background: rgba(10, 14, 24, 0.9) !important;
+  border-color: var(--xianxia-border) !important;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#notesHeader {
+  color: var(--xianxia-gold) !important;
+  border-bottom-color: var(--xianxia-border) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+#notesLegend {
+  background-color: var(--xianxia-input-bg) !important;
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Dropdown Menus ===== */
+#saveDropdown,
+#loadDropdown {
+  background-color: var(--xianxia-panel) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+#saveDropdown > div,
+#loadDropdown > div {
+  color: var(--xianxia-text) !important;
+}
+
+#saveDropdown > div:hover,
+#loadDropdown > div:hover {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+
+/* ===== About Content ===== */
+#aboutContent a {
+  color: var(--xianxia-gold) !important;
+}
+
+#aboutContent p {
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Links ===== */
+a {
+  color: var(--xianxia-gold) !important;
+  transition: color 0.2s ease !important;
+}
+
+a:hover {
+  color: var(--xianxia-gold-bright) !important;
+}
+
+a:visited {
+  color: var(--xianxia-accent-purple) !important;
+}
+
+.pseudoLink {
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Tables ===== */
+#optionsContent table {
+  color: var(--xianxia-text) !important;
+}
+
+.matrix-table > table th {
+  background-color: rgba(30, 22, 8, 0.8) !important;
+  color: var(--xianxia-gold) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+.matrix-table > table td {
+  border-color: var(--xianxia-border) !important;
+}
+
+.matrix-table > table td:hover {
+  outline-color: var(--xianxia-gold-dim) !important;
+}
+
+/* Diplomacy relation colors - slightly darkened versions */
+.matrix-table > table td.Ally { background-color: rgba(90, 196, 138, 0.3) !important; color: var(--xianxia-accent-green) !important; }
+.matrix-table > table td.Friendly { background-color: rgba(90, 196, 138, 0.15) !important; color: var(--xianxia-text) !important; }
+.matrix-table > table td.Neutral { background-color: rgba(138, 122, 90, 0.2) !important; color: var(--xianxia-text-muted) !important; }
+.matrix-table > table td.Suspicion { background-color: rgba(196, 90, 90, 0.15) !important; color: var(--xianxia-text) !important; }
+.matrix-table > table td.Enemy { background-color: rgba(196, 90, 90, 0.3) !important; color: var(--xianxia-accent-red) !important; }
+.matrix-table > table td.Unknown { background-color: rgba(100, 100, 100, 0.2) !important; color: var(--xianxia-text-dim) !important; }
+.matrix-table > table td.Rival { background-color: rgba(196, 130, 90, 0.25) !important; color: var(--xianxia-text) !important; }
+.matrix-table > table td.Vassal { background-color: rgba(90, 140, 196, 0.2) !important; color: var(--xianxia-accent-blue) !important; }
+.matrix-table > table td.Suzerain { background-color: rgba(155, 127, 186, 0.25) !important; color: var(--xianxia-accent-purple) !important; }
+.matrix-table > table td.x { background-color: rgba(74, 53, 24, 0.3) !important; color: var(--xianxia-text-dim) !important; }
+
+
+/* ===== State/Province List Items ===== */
+div.states {
+  border-color: var(--xianxia-border) !important;
+  background-image: linear-gradient(to right, rgba(10, 14, 24, 0.5), rgba(15, 20, 32, 0.5), rgba(20, 26, 40, 0.5)) !important;
+  color: var(--xianxia-text) !important;
+}
+
+div.states:hover,
+div.states.hovered {
+  border-color: var(--xianxia-gold-dim) !important;
+  background-image: linear-gradient(to right, rgba(196, 163, 90, 0.08), rgba(196, 163, 90, 0.05), rgba(196, 163, 90, 0.02)) !important;
+}
+
+div.states.selected {
+  border-color: var(--xianxia-gold-dim) !important;
+  background-image: linear-gradient(to right, rgba(196, 163, 90, 0.12), rgba(196, 163, 90, 0.08), rgba(196, 163, 90, 0.05)) !important;
+}
+
+div.states.active {
+  border-color: var(--xianxia-gold-dim) !important;
+  background-image: linear-gradient(to right, rgba(196, 163, 90, 0.1), rgba(196, 163, 90, 0.06), rgba(196, 163, 90, 0.03)) !important;
+}
+
+div.states > input {
+  background: none !important;
+  color: var(--xianxia-text) !important;
+  border: none !important;
+}
+
+div.states > select {
+  background-color: transparent !important;
+  color: var(--xianxia-text) !important;
+}
+
+div.states > [class^="icon-"] {
+  color: var(--xianxia-text-dim) !important;
+}
+
+div.states span.inactive {
+  color: var(--xianxia-text-dim) !important;
+}
+
+div.states span.inactive:hover {
+  color: var(--xianxia-text-muted) !important;
+}
+
+.totalLine {
+  color: var(--xianxia-text-muted) !important;
+}
+
+div.header {
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Fieldsets ===== */
+fieldset {
+  border-color: var(--xianxia-border) !important;
+}
+
+legend {
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Template Editor ===== */
+#templateBody > div {
+  border-color: var(--xianxia-border) !important;
+  background-image: linear-gradient(to right, rgba(10, 14, 24, 0.6), rgba(15, 20, 32, 0.5), rgba(20, 26, 40, 0.4)) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#templateBody > div:hover {
+  border-color: var(--xianxia-gold-dim) !important;
+  background-image: linear-gradient(to right, rgba(196, 163, 90, 0.08), rgba(196, 163, 90, 0.05), rgba(196, 163, 90, 0.02)) !important;
+}
+
+#templateBody input,
+#templateBody select {
+  background-color: rgba(196, 163, 90, 0.08) !important;
+  color: var(--xianxia-gold) !important;
+}
+
+#templateTools > button {
+  color: var(--xianxia-text) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+
+/* ===== Separator Lines ===== */
+.separator {
+  color: var(--xianxia-gold) !important;
+}
+
+.separator::before,
+.separator::after {
+  border-bottom-color: var(--xianxia-gold-dim) !important;
+}
+
+
+/* ===== Info Lines ===== */
+.info-line {
+  color: var(--xianxia-text-muted) !important;
+}
+
+#sizeOutput {
+  color: var(--xianxia-accent-green) !important;
+}
+
+
+/* ===== Style Editor ===== */
+#styleContent table {
+  color: var(--xianxia-text) !important;
+}
+
+#styleIsOff {
+  color: var(--xianxia-accent-red) !important;
+}
+
+#styleElements .whiteButton {
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Chart Info ===== */
+.chartInfo {
+  color: var(--xianxia-text-muted) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+
+/* ===== Color Controls ===== */
+.color-div {
+  border-color: var(--xianxia-border) !important;
+}
+
+.color-div:hover {
+  border-color: var(--xianxia-gold) !important;
+}
+
+.hoveredColor {
+  box-shadow: 0 0 2px 1px var(--xianxia-gold-dim) !important;
+}
+
+.selectedColor {
+  outline-color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Marker Type Selector ===== */
+#markerTypeSelectMenu {
+  background: var(--xianxia-panel) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+#markerTypeSelectMenu > button {
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#markerTypeSelectMenu > button:hover {
+  background: rgba(196, 163, 90, 0.15) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+
+/* ===== Relief Icons ===== */
+#reliefIconsDiv svg {
+  background-color: rgba(10, 14, 24, 0.6) !important;
+  border-color: var(--xianxia-border) !important;
+}
+
+#reliefIconsDiv svg:hover {
+  border-color: var(--xianxia-gold-dim) !important;
+  background-color: rgba(196, 163, 90, 0.1) !important;
+}
+
+#reliefIconsDiv svg.pressed {
+  border-color: var(--xianxia-gold) !important;
+  background-color: rgba(196, 163, 90, 0.15) !important;
+}
+
+
+/* ===== Diplomacy ===== */
+#diplomacySelect {
+  background-color: var(--xianxia-panel) !important;
+  border-color: var(--xianxia-gold-dim) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#diplomacySelect > div:hover {
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+
+/* ===== Regiment Selector ===== */
+div#regimentSelectorBody > div {
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+}
+
+div#regimentSelectorBody > div:hover {
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+div#regimentSelectorBody > div.selected {
+  border-color: var(--xianxia-gold) !important;
+}
+
+div#regimentSelectorBody > div.inactive {
+  background-color: rgba(10, 14, 24, 0.4) !important;
+  color: var(--xianxia-text-dim) !important;
+}
+
+
+/* ===== Battle UI ===== */
+#battleBody > table {
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#battleBottom div.battleTypes,
+#battleBody div.battlePhases {
+  background-color: rgba(10, 14, 24, 0.5) !important;
+}
+
+
+/* ===== Emblem Editor ===== */
+#emblemBody > div.active {
+  background-color: rgba(90, 196, 138, 0.1) !important;
+}
+
+.emblemShapePreview {
+  fill: var(--xianxia-text) !important;
+  stroke: var(--xianxia-border) !important;
+}
+
+
+/* ===== Hover Button ===== */
+.hoverButton {
+  background-color: rgba(30, 22, 8, 0.8) !important;
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== World Controls ===== */
+#worldControls input[type="number"] {
+  border-color: var(--xianxia-border) !important;
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#worldControls i.icon-lock-open,
+#worldControls i.icon-lock {
+  color: var(--xianxia-text-dim) !important;
+}
+
+
+/* ===== Units Editor ===== */
+#unitsBody > div > select,
+#unitsBody > div > input[type="text"] {
+  border-color: var(--xianxia-border) !important;
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+#unitsEditor i.icon-lock-open,
+#unitsEditor i.icon-lock {
+  color: var(--xianxia-text-dim) !important;
+}
+
+
+/* ===== Military Options ===== */
+#militaryOptionsTable select,
+#militaryOptionsTable input {
+  border-color: var(--xianxia-border) !important;
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Route / Coastline ===== */
+#routeLength,
+#coastlineArea {
+  background-color: rgba(10, 14, 24, 0.8) !important;
+  border-color: var(--xianxia-border) !important;
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Reset Button Icons ===== */
+i.resetButton {
+  color: var(--xianxia-gold) !important;
+}
+
+i.resetButton:active {
+  color: var(--xianxia-gold-bright) !important;
+}
+
+
+/* ===== Options Cog Icons ===== */
+#options button i.icon-cog {
+  background-color: rgba(10, 14, 24, 0.8) !important;
+  color: var(--xianxia-text-dim) !important;
+}
+
+#options button i.icon-cog:hover {
+  color: var(--xianxia-gold) !important;
+  background-color: rgba(196, 163, 90, 0.15) !important;
+}
+
+
+/* ===== Seed Restore ===== */
+.optionsSeedRestore {
+  color: var(--xianxia-text-dim) !important;
+}
+
+.optionsSeedRestore:hover {
+  color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Glowing Animation (rethemed) ===== */
+@keyframes xianxiaGlowing {
+  0% { box-shadow: 0 0 2px var(--xianxia-gold-dim); }
+  50% { box-shadow: 0 0 12px var(--xianxia-gold); }
+  100% { box-shadow: 0 0 2px var(--xianxia-gold-dim); }
+}
+
+#finalizeHeightmap {
+  animation: xianxiaGlowing 2s infinite !important;
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  color: var(--xianxia-gold-bright) !important;
+  border: 1px solid var(--xianxia-gold-dim) !important;
+  font-family: var(--xianxia-font-body) !important;
+}
+
+.glow {
+  animation: xianxiaGlowing 3s infinite ease-in-out !important;
+}
+
+
+/* ===== Burg Features ===== */
+.burgFeature.inactive {
+  color: var(--xianxia-text-dim) !important;
+}
+
+.burgFeature.inactive:hover {
+  color: var(--xianxia-text-muted) !important;
+}
+
+
+/* ===== Drag Trigger ===== */
+.drag-trigger {
+  border-right-color: var(--xianxia-gold-dim) !important;
+}
+
+
+/* ===== Don't Ask Checkbox ===== */
+.dontAsk {
+  color: var(--xianxia-text-muted) !important;
+}
+
+
+/* ===== Burg / River / Route Body Labels ===== */
+#burgBody div.label,
+#riverBody div.label,
+#routeBody div.label,
+#lakeBody div.label,
+#stateNameEditor div.label,
+#provinceNameEditor div.label,
+#regimentBody div.label,
+#markerEditor div.label {
+  color: var(--xianxia-text-muted) !important;
+}
+
+
+/* ===== Population Footer ===== */
+#burgsFooterPopulation {
+  color: var(--xianxia-text-muted) !important;
+}
+
+
+/* ===== Textual / Names Editor ===== */
+div.textual select,
+div.textual textarea,
+div.textual input {
+  font-family: var(--xianxia-font-body) !important;
+  background-color: var(--xianxia-input-bg) !important;
+  color: var(--xianxia-text) !important;
+}
+
+div.textual span,
+.textual legend {
+  color: var(--xianxia-gold) !important;
+}
+
+div.textual fieldset {
+  border-color: var(--xianxia-gold-dim) !important;
+}
+
+
+/* ===== Editor Lines ===== */
+div.editorLine {
+  color: var(--xianxia-text) !important;
+}
+
+
+/* ===== Scrollbars (WebKit) ===== */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 8, 15, 0.5) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--xianxia-gold-dim) !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(5, 8, 15, 0.3) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--xianxia-gold) !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(5, 8, 15, 0.5) !important;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--xianxia-gold-dim) rgba(5, 8, 15, 0.5) !important;
+}
+
+
+/* ===== Select Dropdown Styling ===== */
+select option {
+  background-color: #0a0e18 !important;
+  color: var(--xianxia-text) !important;
+}
+
+select option:checked {
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+select option:hover {
+  background-color: rgba(196, 163, 90, 0.15) !important;
+}
+
+
+/* ===== Picker (SVG Color Picker) ===== */
+#pickerHeader {
+  fill: rgba(196, 163, 90, 0.2) !important;
+  stroke: var(--xianxia-border) !important;
+}
+
+#pickerLabel {
+  fill: var(--xianxia-gold-bright) !important;
+  font-family: var(--xianxia-font-heading) !important;
+}
+
+#pickerCloseRect {
+  fill: rgba(196, 90, 90, 0.3) !important;
+  stroke: var(--xianxia-gold) !important;
+}
+
+#pickerCloseText {
+  fill: var(--xianxia-text) !important;
+}
+
+
+/* ===== View Mode Buttons ===== */
+#viewMode > button {
+  font-family: var(--xianxia-font-body) !important;
+}
+
+
+/* ===== Layer / Filter Buttons ===== */
+#layersContent button.active {
+  background-color: rgba(196, 163, 90, 0.2) !important;
+  color: var(--xianxia-gold-bright) !important;
+}
+
+
+/* ===== Share Buttons ===== */
+ul.share-buttons li {
+  background: none !important;
+}
+
+
+/* ===== Highlighted Elements ===== */
+.highlighted {
+  outline-color: var(--xianxia-gold) !important;
+}
+
+
+/* ===== Chat Widget ===== */
+#chat-widget-container {
+  opacity: 0.8 !important;
+}
+
+
+/* ===== Dark Scheme Override ===== */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: var(--xianxia-bg) !important;
+  }
+}
+
+
+/* ===== Heightmap Selection (dynamic module) ===== */
+[style*="outline: 1px solid var(--dark-solid)"] {
+  outline-color: var(--xianxia-gold-dim) !important;
+}
+
+
+/* ===== Misc Cleanup ===== */
+/* Ensure all text in the panel reads well */
+#optionsContainer * {
+  border-color: var(--xianxia-border);
+}
+
+/* Muted tint filter override for dark theme */
+.tint {
+  filter: sepia(0.6) hue-rotate(10deg) brightness(0.8) !important;
+}
+
+/* Convert image dialog */
+#convertImageDialog input[type="color"] {
+  background: none !important;
+}
+
+
+/* ===== Subtle Gold Glow on Interactive Focus ===== */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 1px solid var(--xianxia-gold-dim) !important;
+  box-shadow: 0 0 6px rgba(196, 163, 90, 0.2) !important;
+}
