@@ -88,5 +88,12 @@ export default defineConfig({
       }
     })
   ],
-  server: {},
+  server: {
+    proxy: {
+      '/fmg': {
+        target: 'http://localhost:5174',
+        rewrite: path => path.replace(/^\/fmg/, ''),
+      },
+    },
+  },
 })

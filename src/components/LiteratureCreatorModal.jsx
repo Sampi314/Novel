@@ -177,6 +177,14 @@ const ms = {
     fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
     cursor: 'pointer', letterSpacing: 1,
   },
+  manualButton: {
+    padding: '12px 28px',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--gold-dim)',
+    borderRadius: 6, color: 'var(--gold)',
+    fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+    cursor: 'pointer', letterSpacing: 1,
+  },
   secondaryButton: {
     padding: '10px 20px', background: 'var(--bg-input)',
     border: '1px solid var(--border)', borderRadius: 6,
@@ -216,7 +224,7 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
   const [step, setStep] = useState('input');
   const [mode, setMode] = useState('single'); // 'single' | 'series' | 'queue'
   const [apiKeyInput, setApiKeyInput] = useState(getApiKey());
-  const [showApiKeySettings, setShowApiKeySettings] = useState(!getApiKey());
+  const [showApiKeySettings, setShowApiKeySettings] = useState(false);
   const [form, setForm] = useState({
     type: 'tho', title: '', era: '', relatedCharacters: [], relatedEvents: [], relatedLocations: [], concept: '',
   });
@@ -263,6 +271,11 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
       setError(err.message);
       setStep('input');
     }
+  };
+
+  const handleManualInput = () => {
+    setSections({ original: '', hanViet: '', translation: '', stylePrompt: '', analysis: '' });
+    setStep('review');
   };
 
   const handleRegenerateSection = async (sectionKey) => {
@@ -484,7 +497,7 @@ Respond with ONLY the JSON object. No markdown fences.`;
           {/* API Key Settings */}
           {showApiKeySettings && (
             <div style={{ ...ms.fieldGroup, padding: 16, background: 'var(--gold-glow)', borderRadius: 8, border: '1px solid var(--border)' }}>
-              <div style={ms.label}>Anthropic API Key</div>
+              <div style={ms.label}>Anthropic API Key <span style={{ color: 'var(--text-dim)', fontWeight: 400 }}>(chỉ cần cho AI)</span></div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="password"
@@ -598,10 +611,10 @@ Respond with ONLY the JSON object. No markdown fences.`;
 
           {step === 'input' && mode === 'single' && (
             <>
-              {!showApiKeySettings && getApiKey() && (
+              {!showApiKeySettings && (
                 <div style={{ textAlign: 'right', marginBottom: 12 }}>
                   <button onClick={() => setShowApiKeySettings(true)} style={{ ...ms.secondaryButton, fontSize: 11, padding: '4px 10px' }}>
-                    API Key ✓
+                    {getApiKey() ? 'API Key ✓' : 'API Key'}
                   </button>
                 </div>
               )}
@@ -701,8 +714,34 @@ Respond with ONLY the JSON object. No markdown fences.`;
           {step === 'review' && (
             <>
               <div style={{ marginBottom: 16, fontSize: 13, color: 'var(--text-dim)' }}>
-                Chỉnh sửa nội dung hoặc tạo lại từng phần trước khi lưu.
+                Chỉnh sửa nội dung trước khi lưu.
               </div>
+
+              {/* Editable metadata */}
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr auto 1fr', marginBottom: 20 }}>
+                <div style={ms.fieldGroup}>
+                  <div style={ms.label}>Tiêu đề</div>
+                  <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} style={ms.input} />
+                </div>
+                <div style={ms.fieldGroup}>
+                  <div style={ms.label}>Thể loại</div>
+                  <div style={ms.typeTabs}>
+                    {TYPES.map(t => (
+                      <div key={t.id} style={{ ...ms.typeTab(form.type === t.id), padding: '8px 12px', flex: 'none' }} onClick={() => setForm(f => ({ ...f, type: t.id }))}>
+                        <div style={ms.typeTabVi(form.type === t.id)}>{t.vi}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={ms.fieldGroup}>
+                  <div style={ms.label}>Kỷ Nguyên</div>
+                  <select value={form.era} onChange={e => setForm(f => ({ ...f, era: e.target.value }))} style={ms.select}>
+                    <option value="">— Chọn —</option>
+                    {eras.map(era => <option key={era.name} value={era.name}>{era.name}{era.han ? ` (${era.han})` : ''}</option>)}
+                  </select>
+                </div>
+              </div>
+
               {getSectionLabels(form.type).map(sec => (
                 <div key={sec.key} style={ms.sectionCard}>
                   <div style={ms.sectionWatermark}>{sec.han}</div>
@@ -711,13 +750,15 @@ Respond with ONLY the JSON object. No markdown fences.`;
                       <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--gold)' }}>{sec.vi}</span>
                       <span style={{ fontSize: 12, color: 'var(--text-dim)', marginLeft: 8 }}>{sec.han}</span>
                     </div>
-                    <button
-                      onClick={() => handleRegenerateSection(sec.key)}
-                      disabled={regeneratingSection === sec.key}
-                      style={{ padding: '4px 12px', fontSize: 12, background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--gold-dim)', cursor: 'pointer', opacity: regeneratingSection === sec.key ? 0.5 : 1 }}
-                    >
-                      {regeneratingSection === sec.key ? 'Đang tạo lại...' : '↻ Tạo lại'}
-                    </button>
+                    {getApiKey() && (
+                      <button
+                        onClick={() => handleRegenerateSection(sec.key)}
+                        disabled={regeneratingSection === sec.key}
+                        style={{ padding: '4px 12px', fontSize: 12, background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--gold-dim)', cursor: 'pointer', opacity: regeneratingSection === sec.key ? 0.5 : 1 }}
+                      >
+                        {regeneratingSection === sec.key ? 'Đang tạo lại...' : '↻ Tạo lại'}
+                      </button>
+                    )}
                   </div>
                   <textarea
                     value={sections[sec.key]}
@@ -782,13 +823,21 @@ Respond with ONLY the JSON object. No markdown fences.`;
         {step === 'input' && mode === 'single' && (
           <div style={ms.footer}>
             <button onClick={onClose} style={ms.secondaryButton}>Hủy</button>
-            <button
-              onClick={handleGenerate}
-              disabled={!form.title || !form.era || !form.concept || !getApiKey()}
-              style={{ ...ms.goldButton, opacity: (!form.title || !form.era || !form.concept || !getApiKey()) ? 0.4 : 1 }}
-            >
-              Tạo bằng AI
-            </button>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={handleManualInput}
+                style={ms.manualButton}
+              >
+                Tự nhập
+              </button>
+              <button
+                onClick={handleGenerate}
+                disabled={!form.title || !form.era || !form.concept || !getApiKey()}
+                style={{ ...ms.goldButton, opacity: (!form.title || !form.era || !form.concept || !getApiKey()) ? 0.4 : 1 }}
+              >
+                Tạo bằng AI
+              </button>
+            </div>
           </div>
         )}
 
@@ -821,7 +870,13 @@ Respond with ONLY the JSON object. No markdown fences.`;
         {step === 'review' && (
           <div style={ms.footer}>
             <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
-            <button onClick={handleSave} style={ms.goldButton}>Lưu Tác Phẩm</button>
+            <button
+              onClick={handleSave}
+              disabled={!form.title}
+              style={{ ...ms.goldButton, opacity: !form.title ? 0.4 : 1 }}
+            >
+              Lưu Tác Phẩm
+            </button>
           </div>
         )}
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import * as d3 from 'd3';
 import Sidebar from './components/Sidebar';
 import MobileTabBar from './components/MobileTabBar';
-import MapViewer from './map/MapViewer';
+import FMGEmbed from './components/FMGEmbed';
 import StarParticles from './components/StarParticles';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -204,7 +204,7 @@ export default function App() {
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden', paddingBottom: isMobile ? 52 : 0, zIndex: 2 }}>
         {/* Map stays mounted, hidden via display */}
         <div style={{ width: '100%', height: '100%', display: activeTab === 'map' ? 'block' : 'none' }}>
-          <MapViewer data={data} theme={theme} mapZoomTarget={mapZoomTarget} />
+          <FMGEmbed theme={theme} mapZoomTarget={mapZoomTarget} onNavigate={setActiveTab} />
         </div>
         {/* Other pages mount/unmount with slide-up transition */}
         {activeTab !== 'map' && (
