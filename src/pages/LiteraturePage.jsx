@@ -126,15 +126,55 @@ const s = {
     borderRadius: 4,
     color: 'var(--text-dim)',
   },
+  chipLink: {
+    fontSize: 10,
+    padding: '2px 6px',
+    background: 'var(--gold-glow)',
+    border: '1px solid var(--border)',
+    borderRadius: 4,
+    color: 'var(--gold-dim)',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  searchRow: {
+    display: 'flex',
+    gap: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+    padding: '8px 14px',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--border)',
+    borderRadius: 6,
+    color: 'var(--text)',
+    fontFamily: 'var(--font-body)',
+    fontSize: 13,
+    outline: 'none',
+  },
+  filterSelect: {
+    padding: '8px 12px',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--border)',
+    borderRadius: 6,
+    color: 'var(--text)',
+    fontFamily: 'var(--font-body)',
+    fontSize: 13,
+    outline: 'none',
+    minWidth: 140,
+  },
 };
 
-export default function LiteraturePage({ data }) {
+export default function LiteraturePage({ data, onNavigate }) {
   const [activeCategory, setActiveCategory] = useState('tho');
   const [index, setIndex] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [content, setContent] = useState('');
   const [loadingContent, setLoadingContent] = useState(false);
   const [showCreator, setShowCreator] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterEra, setFilterEra] = useState('');
 
   useEffect(() => {
     fetch('/data/literature-index.json')
@@ -145,15 +185,43 @@ export default function LiteraturePage({ data }) {
 
   const items = index?.[activeCategory] || [];
 
+  const allEras = useMemo(() => {
+    const set = new Set();
+    items.forEach(item => set.add(item.era || 'Khác'));
+    return [...set];
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (filterEra) result = result.filter(item => (item.era || 'Khác') === filterEra);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(item =>
+        item.title?.toLowerCase().includes(q) ||
+        item.description?.toLowerCase().includes(q) ||
+        item.tags?.some(t => t.toLowerCase().includes(q)) ||
+        item.relatedCharacters?.some(id => {
+          const c = data?.characters?.find(ch => ch.id === id);
+          return c?.name?.toLowerCase().includes(q);
+        }) ||
+        item.relatedEvents?.some(id => {
+          const ev = data?.events?.find(e => e.id === id);
+          return ev?.name?.toLowerCase().includes(q);
+        })
+      );
+    }
+    return result;
+  }, [items, filterEra, searchQuery, data]);
+
   const groupedByEra = useMemo(() => {
     const groups = {};
-    items.forEach(item => {
+    filteredItems.forEach(item => {
       const era = item.era || 'Khác';
       if (!groups[era]) groups[era] = [];
       groups[era].push(item);
     });
     return groups;
-  }, [items]);
+  }, [filteredItems]);
 
   const loadContent = (item) => {
     if (activeItem === item.id) {
@@ -199,20 +267,20 @@ export default function LiteraturePage({ data }) {
       <div style={s.itemTitle}>{item.title}</div>
       {item.description && <div style={s.itemDesc}>{item.description}</div>}
 
-      {/* Metadata chips */}
+      {/* Metadata chips — clickable cross-references */}
       {(item.relatedCharacters?.length > 0 || item.relatedEvents?.length > 0 || item.relatedLocations?.length > 0 || item.tags?.length > 0) && (
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
           {item.relatedCharacters?.map(id => {
             const c = data?.characters?.find(ch => ch.id === id);
-            return <span key={`c-${id}`} style={s.chip}>{c?.name || id}</span>;
+            return <span key={`c-${id}`} style={s.chipLink} onClick={e => { e.stopPropagation(); onNavigate?.('characters'); }}>{c?.name || id}</span>;
           })}
           {item.relatedEvents?.map(id => {
             const ev = data?.events?.find(e => e.id === id);
-            return <span key={`e-${id}`} style={s.chip}>{ev?.name || id}</span>;
+            return <span key={`e-${id}`} style={s.chipLink} onClick={e => { e.stopPropagation(); onNavigate?.('events'); }}>{ev?.name || id}</span>;
           })}
           {item.relatedLocations?.map(id => {
             const loc = data?.locations?.find(l => l.id === id);
-            return <span key={`l-${id}`} style={s.chip}>{loc?.name || id}</span>;
+            return <span key={`l-${id}`} style={s.chipLink} onClick={e => { e.stopPropagation(); onNavigate?.('locations'); }}>{loc?.name || id}</span>;
           })}
           {item.tags?.map(tag => (
             <span key={tag} style={s.tagChip}>{tag}</span>
@@ -295,6 +363,27 @@ export default function LiteraturePage({ data }) {
           </div>
         ))}
       </div>
+
+      {/* Search & Filter */}
+      {items.length > 0 && (
+        <div style={s.searchRow}>
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Tìm kiếm tác phẩm..."
+            style={s.searchInput}
+          />
+          <select value={filterEra} onChange={e => setFilterEra(e.target.value)} style={s.filterSelect}>
+            <option value="">Tất cả kỷ nguyên</option>
+            {allEras.map(era => <option key={era} value={era}>{era}</option>)}
+          </select>
+          {(searchQuery || filterEra) && (
+            <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+              {filteredItems.length}/{items.length}
+            </span>
+          )}
+        </div>
+      )}
 
       {Object.keys(groupedByEra).length === 0 ? (
         <div style={s.empty}>

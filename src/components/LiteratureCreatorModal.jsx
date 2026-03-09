@@ -214,6 +214,7 @@ const ms = {
 
 export default function LiteratureCreatorModal({ isOpen, onClose, data, onLiteratureSaved }) {
   const [step, setStep] = useState('input');
+  const [mode, setMode] = useState('single'); // 'single' | 'series' | 'queue'
   const [apiKeyInput, setApiKeyInput] = useState(getApiKey());
   const [showApiKeySettings, setShowApiKeySettings] = useState(!getApiKey());
   const [form, setForm] = useState({
@@ -222,6 +223,14 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
   const [sections, setSections] = useState({ original: '', hanViet: '', translation: '', stylePrompt: '', analysis: '' });
   const [error, setError] = useState(null);
   const [regeneratingSection, setRegeneratingSection] = useState(null);
+  // Series mode
+  const [seriesForm, setSeriesForm] = useState({ type: 'tho', era: '', theme: '', count: 3 });
+  const [seriesResults, setSeriesResults] = useState([]);
+  const [seriesProgress, setSeriesProgress] = useState({ current: 0, total: 0, saving: false });
+  // Queue mode
+  const [queue, setQueue] = useState([]);
+  const [queueResults, setQueueResults] = useState([]);
+  const [queueProgress, setQueueProgress] = useState({ current: 0, total: 0, saving: false });
 
   const eras = useMemo(() => data?.eras || [], [data]);
   const characters = useMemo(() => data?.characters || [], [data]);
@@ -316,6 +325,138 @@ Please REGENERATE ONLY the "${sectionLabel.vi}" (${sectionLabel.han}) section. K
   const handleSaveApiKey = () => {
     setApiKey(apiKeyInput);
     setShowApiKeySettings(false);
+  };
+
+  // --- Series Mode ---
+  const handleSeriesGenerate = async () => {
+    setStep('generating');
+    setError(null);
+    setSeriesResults([]);
+    const total = seriesForm.count;
+    setSeriesProgress({ current: 0, total, saving: false });
+    const results = [];
+    try {
+      for (let i = 0; i < total; i++) {
+        setSeriesProgress(p => ({ ...p, current: i + 1 }));
+        const systemPrompt = buildLiteratureSystemPrompt(seriesForm.type);
+        const userMessage = `Create ${seriesForm.type === 'tho' ? 'a poem' : seriesForm.type === 'nhac' ? 'a song' : 'a prose piece'} for Cố Nguyên Giới.
+
+This is piece ${i + 1} of ${total} in a themed series.
+Era: ${seriesForm.era}
+Theme: ${seriesForm.theme}
+Variation: Create something DIFFERENT from previous pieces — vary the mood, perspective, subject, or poetic form.
+${i > 0 ? `Previous titles in this series: ${results.map(r => r.title).join(', ')}` : ''}
+
+World factions: ${data.factions?.map(f => `${f.name} (${f.han || ''})`).join(', ') || 'N/A'}
+Characters: ${data.characters?.slice(0, 10).map(c => `${c.name} (${c.han || ''})`).join(', ') || 'N/A'}
+
+Also include a "title" field in your JSON for this piece's title.
+Respond with ONLY the JSON object. No markdown fences.`;
+
+        const result = await callClaude({ systemPrompt, userMessage, maxTokens: 8192 });
+        results.push({ ...result, type: seriesForm.type, era: seriesForm.era });
+      }
+      setSeriesResults(results);
+      setStep('series-review');
+    } catch (err) {
+      setError(err.message);
+      setSeriesResults(results);
+      if (results.length > 0) setStep('series-review');
+      else setStep('input');
+    }
+  };
+
+  const handleSeriesSaveAll = async () => {
+    setSeriesProgress(p => ({ ...p, saving: true, current: 0 }));
+    try {
+      for (let i = 0; i < seriesResults.length; i++) {
+        setSeriesProgress(p => ({ ...p, current: i + 1 }));
+        const r = seriesResults[i];
+        const indexRes = await fetch('/data/literature-index.json');
+        const currentIndex = await indexRes.json();
+        const newId = getNextLiteratureId(r.type, currentIndex);
+        await saveLiterature({
+          id: newId, type: r.type,
+          title: r.title || `${seriesForm.theme} #${i + 1}`,
+          description: seriesForm.theme,
+          era: r.era,
+          relatedCharacters: [], relatedEvents: [], relatedLocations: [],
+          tags: ['series'],
+          sections: { original: r.original || '', hanViet: r.hanViet || '', translation: r.translation || '', stylePrompt: r.stylePrompt || '', analysis: r.analysis || '' },
+        });
+      }
+      setStep('done');
+      if (onLiteratureSaved) onLiteratureSaved();
+    } catch (err) {
+      setError(err.message);
+      setSeriesProgress(p => ({ ...p, saving: false }));
+    }
+  };
+
+  // --- Queue Mode ---
+  const addToQueue = () => {
+    if (!form.title || !form.era || !form.concept) return;
+    setQueue(prev => [...prev, { ...form, _key: Date.now() }]);
+    setForm(f => ({ ...f, title: '', concept: '' }));
+  };
+
+  const removeFromQueue = (key) => {
+    setQueue(prev => prev.filter(q => q._key !== key));
+  };
+
+  const handleQueueGenerate = async () => {
+    setStep('generating');
+    setError(null);
+    setQueueResults([]);
+    const total = queue.length;
+    setQueueProgress({ current: 0, total, saving: false });
+    const results = [];
+    try {
+      for (let i = 0; i < total; i++) {
+        setQueueProgress(p => ({ ...p, current: i + 1 }));
+        const item = queue[i];
+        const systemPrompt = buildLiteratureSystemPrompt(item.type);
+        const userMessage = buildLiteratureUserMessage(item, data);
+        const result = await callClaude({ systemPrompt, userMessage, maxTokens: 8192 });
+        results.push({ ...result, ...item, _sections: { original: result.original || '', hanViet: result.hanViet || '', translation: result.translation || '', stylePrompt: result.stylePrompt || '', analysis: result.analysis || '' } });
+      }
+      setQueueResults(results);
+      setStep('queue-review');
+    } catch (err) {
+      setError(err.message);
+      setQueueResults(results);
+      if (results.length > 0) setStep('queue-review');
+      else setStep('input');
+    }
+  };
+
+  const handleQueueSaveAll = async () => {
+    setQueueProgress(p => ({ ...p, saving: true, current: 0 }));
+    try {
+      for (let i = 0; i < queueResults.length; i++) {
+        setQueueProgress(p => ({ ...p, current: i + 1 }));
+        const r = queueResults[i];
+        const indexRes = await fetch('/data/literature-index.json');
+        const currentIndex = await indexRes.json();
+        const newId = getNextLiteratureId(r.type, currentIndex);
+        await saveLiterature({
+          id: newId, type: r.type,
+          title: r.title,
+          description: r.concept?.substring(0, 80) || '',
+          era: r.era,
+          relatedCharacters: r.relatedCharacters || [],
+          relatedEvents: r.relatedEvents || [],
+          relatedLocations: r.relatedLocations || [],
+          tags: [],
+          sections: r._sections,
+        });
+      }
+      setStep('done');
+      if (onLiteratureSaved) onLiteratureSaved();
+    } catch (err) {
+      setError(err.message);
+      setQueueProgress(p => ({ ...p, saving: false }));
+    }
   };
 
   if (!isOpen) return null;
