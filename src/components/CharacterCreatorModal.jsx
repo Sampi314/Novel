@@ -29,6 +29,7 @@ You MUST respond with ONLY valid JSON matching this structure (no markdown, no e
   "role": "Role/title in Vietnamese",
   "qi_affinity": "one of the qi types",
   "power": 1-5,
+  "appearance": "Physical description in Vietnamese (height, build, distinguishing features, clothing style)",
   "backstory": "2-3 paragraph backstory in Vietnamese, rich with world lore connections",
   "abilities": "Description of abilities and fighting style in Vietnamese",
   "personality": "Personality traits and motivations in Vietnamese",
@@ -120,6 +121,12 @@ const ms = {
     color: 'var(--text-dim)', fontFamily: 'var(--font-body)', fontSize: 14,
     cursor: 'pointer',
   },
+  manualButton: {
+    padding: '12px 28px', background: 'var(--bg-input)',
+    border: '1px solid var(--gold-dim)', borderRadius: 6,
+    color: 'var(--gold)', fontFamily: 'var(--font-body)', fontSize: 15,
+    fontWeight: 600, cursor: 'pointer', letterSpacing: 1,
+  },
   footer: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     padding: '16px 28px', borderTop: '1px solid var(--border)',
@@ -149,6 +156,17 @@ const ms = {
     cursor: 'pointer', overflow: 'hidden', flexShrink: 0,
     background: 'var(--bg-input)',
   },
+  journeyTag: {
+    display: 'inline-flex', alignItems: 'center', gap: 4,
+    padding: '3px 10px', margin: '3px 4px 3px 0',
+    borderRadius: 10, fontSize: 12,
+    background: 'var(--gold-glow)', border: '1px solid var(--border)',
+    color: 'var(--text-body)',
+  },
+  journeyRemove: {
+    background: 'none', border: 'none', color: 'var(--text-dim)',
+    cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1,
+  },
 };
 
 export default function CharacterCreatorModal({ isOpen, onClose, data, onCharacterSaved }) {
@@ -161,6 +179,7 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
   const [result, setResult] = useState(null);
   const [portrait, setPortrait] = useState(null);
   const [error, setError] = useState(null);
+  const [journeySelect, setJourneySelect] = useState('');
 
   const eras = useMemo(() => data?.eras || [], [data]);
   const factions = useMemo(() => data?.factions || [], [data]);
@@ -173,12 +192,37 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
       const systemPrompt = buildCharacterSystemPrompt();
       const userMessage = buildCharacterUserMessage(form, data);
       const r = await callClaude({ systemPrompt, userMessage, maxTokens: 8192 });
-      setResult(r);
+
+      const eraObj = eras.find(e => e.name === form.era);
+      setResult({
+        ...r,
+        faction: form.faction,
+        era_start: eraObj?.year ?? 0,
+        era_end: '',
+        location_id: form.location_id,
+        journey: form.location_id ? [form.location_id] : [],
+        appearance: r.appearance || '',
+      });
       setStep('review');
     } catch (err) {
       setError(err.message);
       setStep('input');
     }
+  };
+
+  const handleManualInput = () => {
+    const eraObj = eras.find(e => e.name === form.era);
+    setResult({
+      name: '', han: '', role: '', qi_affinity: '', power: 3,
+      faction: form.faction || '',
+      era_start: eraObj?.year ?? '',
+      era_end: '',
+      location_id: form.location_id || '',
+      journey: form.location_id ? [form.location_id] : [],
+      appearance: '', backstory: '', abilities: '', personality: '',
+      relationships: [],
+    });
+    setStep('review');
   };
 
   const handleSave = async () => {
@@ -191,20 +235,20 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
         id: newId,
         name: result.name,
         han: result.han,
-        faction: form.faction,
+        faction: result.faction,
         role: result.role,
         qi_affinity: result.qi_affinity,
         power: result.power || 3,
-        era_start: eras.find(e => e.name === form.era)?.yearStart || 0,
-        era_end: null,
-        location_id: form.location_id,
-        journey: form.location_id ? [form.location_id] : [],
+        era_start: result.era_start || 0,
+        era_end: result.era_end || null,
+        location_id: result.location_id || '',
+        journey: result.journey || [],
+        appearance: result.appearance || '',
         backstory: result.backstory,
         abilities: result.abilities,
         personality: result.personality,
       });
 
-      // Save portrait if uploaded
       if (portrait) {
         const { uploadAudio } = await import('../utils/devFileWriter.js');
         await uploadAudio(`public/data/characters/${newId}.png`, portrait);
@@ -228,7 +272,23 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
     setShowApiKeySettings(false);
   };
 
+  const addJourneyLocation = () => {
+    if (!journeySelect || result.journey?.includes(journeySelect)) return;
+    setResult(r => ({ ...r, journey: [...(r.journey || []), journeySelect] }));
+    setJourneySelect('');
+  };
+
+  const removeJourneyLocation = (index) => {
+    setResult(r => ({ ...r, journey: r.journey.filter((_, i) => i !== index) }));
+  };
+
   if (!isOpen) return null;
+
+  const locationMap = {};
+  locations.forEach(l => { locationMap[l.id] = l; });
+
+  const canGenerate = form.faction && form.era && form.concept && getApiKey();
+  const canSave = result?.name;
 
   return (
     <div style={ms.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
@@ -249,9 +309,9 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
         <div style={ms.body}>
           {error && <div style={ms.error}>{error}</div>}
 
-          {showApiKeySettings && (
+          {showApiKeySettings && step === 'input' && (
             <div style={{ ...ms.fieldGroup, padding: 16, background: 'var(--gold-glow)', borderRadius: 8, border: '1px solid var(--border)' }}>
-              <div style={ms.label}>Anthropic API Key</div>
+              <div style={ms.label}>Anthropic API Key <span style={{ color: 'var(--text-dim)' }}>(chỉ cần cho AI)</span></div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input type="password" value={apiKeyInput} onChange={e => setApiKeyInput(e.target.value)} placeholder="sk-ant-..." style={{ ...ms.input, flex: 1 }} />
                 <button onClick={handleSaveApiKey} style={{ ...ms.secondaryButton, color: 'var(--gold)' }}>Lưu</button>
@@ -293,27 +353,8 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
               </div>
 
               <div style={ms.fieldGroup}>
-                <div style={ms.label}>Ý tưởng nhân vật</div>
+                <div style={ms.label}>Ý tưởng nhân vật <span style={{ color: 'var(--text-dim)' }}>(bắt buộc cho AI, tùy chọn cho tự nhập)</span></div>
                 <textarea value={form.concept} onChange={e => setForm(f => ({ ...f, concept: e.target.value }))} placeholder="Mô tả ngắn gọn nhân vật (VD: Một kiếm sĩ mù dòng Long Tộc, ẩn cư nơi núi Thiên Phong...)" style={ms.textarea} />
-              </div>
-
-              {/* Portrait upload */}
-              <div style={ms.fieldGroup}>
-                <div style={ms.label}>Chân dung (tùy chọn)</div>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                  <label style={ms.portraitArea}>
-                    {portrait ? (
-                      <img src={URL.createObjectURL(portrait)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ fontSize: 28, color: 'var(--gold-dim)' }}>+</span>
-                    )}
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePortraitUpload} />
-                  </label>
-                  <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-                    Tải lên hình ảnh chân dung.<br />
-                    Hỗ trợ: PNG, JPG, WebP
-                  </div>
-                </div>
               </div>
             </>
           )}
@@ -332,46 +373,112 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
                 Chỉnh sửa thông tin trước khi lưu.
               </div>
 
-              {/* Name & Han */}
+              {/* Identity + Portrait */}
               <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
-                {portrait && (
-                  <div style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                <label style={ms.portraitArea}>
+                  {portrait ? (
                     <img src={URL.createObjectURL(portrait)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                )}
+                  ) : (
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, color: 'var(--gold-dim)' }}>+</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>Chân dung</div>
+                    </div>
+                  )}
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePortraitUpload} />
+                </label>
+
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '2fr 1fr' }}>
                     <div>
                       <div style={ms.label}>Tên</div>
-                      <input value={result.name} onChange={e => setResult(r => ({ ...r, name: e.target.value }))} style={ms.input} />
+                      <input value={result.name} onChange={e => setResult(r => ({ ...r, name: e.target.value }))} style={ms.input} placeholder="Tên nhân vật" />
                     </div>
                     <div>
                       <div style={ms.label}>Hán tự</div>
-                      <input value={result.han} onChange={e => setResult(r => ({ ...r, han: e.target.value }))} style={ms.input} />
+                      <input value={result.han} onChange={e => setResult(r => ({ ...r, han: e.target.value }))} style={ms.input} placeholder="漢字" />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr 1fr', marginTop: 10 }}>
-                    <div>
-                      <div style={ms.label}>Vai trò</div>
-                      <input value={result.role} onChange={e => setResult(r => ({ ...r, role: e.target.value }))} style={ms.input} />
-                    </div>
-                    <div>
-                      <div style={ms.label}>Khí chất</div>
-                      <input value={result.qi_affinity} onChange={e => setResult(r => ({ ...r, qi_affinity: e.target.value }))} style={ms.input} />
-                    </div>
-                    <div>
-                      <div style={ms.label}>Sức mạnh (1-5)</div>
-                      <input type="number" min={1} max={5} value={result.power} onChange={e => setResult(r => ({ ...r, power: +e.target.value }))} style={ms.input} />
-                    </div>
+                  <div style={{ marginTop: 10 }}>
+                    <div style={ms.label}>Vai trò / Danh hiệu</div>
+                    <input value={result.role} onChange={e => setResult(r => ({ ...r, role: e.target.value }))} style={ms.input} placeholder="VD: Tộc Trưởng, Kiếm Sĩ, Trưởng Lão..." />
                   </div>
                 </div>
               </div>
 
-              {/* Editable sections */}
+              {/* Stats row */}
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr 1fr', marginBottom: 16 }}>
+                <div>
+                  <div style={ms.label}>Thế lực</div>
+                  <select value={result.faction} onChange={e => setResult(r => ({ ...r, faction: e.target.value }))} style={ms.select}>
+                    <option value="">— Chọn —</option>
+                    {factions.map(f => <option key={f.id} value={f.id}>{f.name}{f.han ? ` (${f.han})` : ''}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <div style={ms.label}>Khí chất</div>
+                  <select value={result.qi_affinity} onChange={e => setResult(r => ({ ...r, qi_affinity: e.target.value }))} style={ms.select}>
+                    <option value="">— Chọn —</option>
+                    {['tối cao', 'cao', 'trung', 'thấp', 'âm', 'dương', 'hỗn hợp'].map(q => (
+                      <option key={q} value={q}>{q}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div style={ms.label}>Sức mạnh (1-5)</div>
+                  <input type="number" min={1} max={5} value={result.power} onChange={e => setResult(r => ({ ...r, power: +e.target.value }))} style={ms.input} />
+                </div>
+              </div>
+
+              {/* Timeline row */}
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr 1fr', marginBottom: 16 }}>
+                <div>
+                  <div style={ms.label}>Năm bắt đầu</div>
+                  <input type="number" value={result.era_start} onChange={e => setResult(r => ({ ...r, era_start: e.target.value }))} style={ms.input} placeholder="VD: 80000" />
+                </div>
+                <div>
+                  <div style={ms.label}>Năm kết thúc <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>(trống = còn sống)</span></div>
+                  <input type="number" value={result.era_end} onChange={e => setResult(r => ({ ...r, era_end: e.target.value }))} style={ms.input} placeholder="Trống nếu còn sống" />
+                </div>
+                <div>
+                  <div style={ms.label}>Vị trí ban đầu</div>
+                  <select value={result.location_id} onChange={e => setResult(r => ({ ...r, location_id: e.target.value }))} style={ms.select}>
+                    <option value="">— Chọn —</option>
+                    {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Journey */}
+              <div style={ms.fieldGroup}>
+                <div style={ms.label}>Hành trình</div>
+                <div style={{ marginBottom: 6 }}>
+                  {(result.journey || []).map((locId, i) => (
+                    <span key={i} style={ms.journeyTag}>
+                      {locationMap[locId]?.name || locId}
+                      <button style={ms.journeyRemove} onClick={() => removeJourneyLocation(i)}>&times;</button>
+                    </span>
+                  ))}
+                  {(!result.journey || result.journey.length === 0) && (
+                    <span style={{ fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic' }}>Chưa có điểm nào</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <select value={journeySelect} onChange={e => setJourneySelect(e.target.value)} style={{ ...ms.select, flex: 1 }}>
+                    <option value="">— Thêm địa điểm —</option>
+                    {locations.filter(l => !(result.journey || []).includes(l.id)).map(l => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </select>
+                  <button onClick={addJourneyLocation} style={{ ...ms.secondaryButton, color: 'var(--gold)', padding: '8px 16px' }}>+</button>
+                </div>
+              </div>
+
+              {/* Editable text sections */}
               {[
-                { key: 'backstory', label: 'Tiểu sử', han: '傳' },
-                { key: 'abilities', label: 'Năng lực', han: '能' },
-                { key: 'personality', label: 'Tính cách', han: '性' },
+                { key: 'appearance', label: 'Ngoại hình', han: '貌', placeholder: 'Mô tả ngoại hình, trang phục, đặc điểm nhận dạng...' },
+                { key: 'backstory', label: 'Tiểu sử', han: '傳', placeholder: 'Câu chuyện quá khứ, nguồn gốc, những sự kiện quan trọng...' },
+                { key: 'abilities', label: 'Năng lực', han: '能', placeholder: 'Chiêu thức, vũ khí, phong cách chiến đấu, khả năng đặc biệt...' },
+                { key: 'personality', label: 'Tính cách', han: '性', placeholder: 'Đặc điểm tính cách, động lực, sở thích, điểm yếu...' },
               ].map(sec => (
                 <div key={sec.key} style={ms.sectionCard}>
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--gold)', marginBottom: 8 }}>
@@ -380,30 +487,70 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
                   <textarea
                     value={result[sec.key] || ''}
                     onChange={e => setResult(r => ({ ...r, [sec.key]: e.target.value }))}
+                    placeholder={sec.placeholder}
                     style={{ ...ms.textarea, minHeight: 100 }}
                   />
                 </div>
               ))}
 
-              {/* Relationships preview */}
-              {result.relationships?.length > 0 && (
-                <div style={ms.sectionCard}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--gold)', marginBottom: 8 }}>
-                    Mối quan hệ <span style={{ fontSize: 11, color: 'var(--gold-dim)', fontFamily: 'var(--font-han)' }}>關</span>
-                  </div>
-                  {result.relationships.map((rel, i) => {
-                    const target = data.characters?.find(c => c.id === rel.targetId);
-                    return (
-                      <div key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 4 }}>
-                        <span style={{ color: 'var(--gold-dim)' }}>{rel.type}</span>
-                        {' → '}
-                        <span style={{ color: 'var(--gold)' }}>{target?.name || rel.targetId}</span>
-                        {rel.description && <span style={{ color: 'var(--text-dim)' }}> — {rel.description}</span>}
-                      </div>
-                    );
-                  })}
+              {/* Relationships */}
+              <div style={ms.sectionCard}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--gold)', marginBottom: 8 }}>
+                  Mối quan hệ <span style={{ fontSize: 11, color: 'var(--gold-dim)', fontFamily: 'var(--font-han)' }}>關</span>
                 </div>
-              )}
+                {(result.relationships || []).map((rel, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                    <select
+                      value={rel.targetId}
+                      onChange={e => {
+                        const updated = [...result.relationships];
+                        updated[i] = { ...updated[i], targetId: e.target.value };
+                        setResult(r => ({ ...r, relationships: updated }));
+                      }}
+                      style={{ ...ms.select, flex: 2 }}
+                    >
+                      <option value="">— Nhân vật —</option>
+                      {data.characters?.map(c => <option key={c.id} value={c.id}>{c.name} ({c.han})</option>)}
+                    </select>
+                    <select
+                      value={rel.type}
+                      onChange={e => {
+                        const updated = [...result.relationships];
+                        updated[i] = { ...updated[i], type: e.target.value };
+                        setResult(r => ({ ...r, relationships: updated }));
+                      }}
+                      style={{ ...ms.select, flex: 1 }}
+                    >
+                      {['ally', 'rival', 'mentor', 'student', 'family', 'enemy'].map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <input
+                      value={rel.description || ''}
+                      onChange={e => {
+                        const updated = [...result.relationships];
+                        updated[i] = { ...updated[i], description: e.target.value };
+                        setResult(r => ({ ...r, relationships: updated }));
+                      }}
+                      placeholder="Mô tả ngắn"
+                      style={{ ...ms.input, flex: 2 }}
+                    />
+                    <button
+                      onClick={() => setResult(r => ({ ...r, relationships: r.relationships.filter((_, j) => j !== i) }))}
+                      style={{ ...ms.journeyRemove, fontSize: 18, color: '#e88' }}
+                    >&times;</button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setResult(r => ({
+                    ...r,
+                    relationships: [...(r.relationships || []), { targetId: '', type: 'ally', description: '' }],
+                  }))}
+                  style={{ ...ms.secondaryButton, fontSize: 12, padding: '6px 14px', color: 'var(--gold)' }}
+                >
+                  + Thêm mối quan hệ
+                </button>
+              </div>
             </>
           )}
 
@@ -427,20 +574,25 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
         {step === 'input' && (
           <div style={ms.footer}>
             <button onClick={onClose} style={ms.secondaryButton}>Hủy</button>
-            <button
-              onClick={handleGenerate}
-              disabled={!form.faction || !form.era || !form.concept || !getApiKey()}
-              style={{ ...ms.goldButton, opacity: (!form.faction || !form.era || !form.concept || !getApiKey()) ? 0.4 : 1 }}
-            >
-              Tạo bằng AI
-            </button>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={handleManualInput} style={ms.manualButton}>
+                Tự nhập
+              </button>
+              <button
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+                style={{ ...ms.goldButton, opacity: canGenerate ? 1 : 0.4 }}
+              >
+                Tạo bằng AI
+              </button>
+            </div>
           </div>
         )}
 
         {step === 'review' && (
           <div style={ms.footer}>
             <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
-            <button onClick={handleSave} style={ms.goldButton}>Lưu Nhân Vật</button>
+            <button onClick={handleSave} disabled={!canSave} style={{ ...ms.goldButton, opacity: canSave ? 1 : 0.4 }}>Lưu Nhân Vật</button>
           </div>
         )}
       </div>
