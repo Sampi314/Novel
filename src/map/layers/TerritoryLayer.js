@@ -3,7 +3,15 @@
  *
  * Each territory from world.json has:
  *   { id, name, han, color, cx, cy, era_start, era_end, pts: [[x,y], ...] }
+ *
+ * Borders use fractal noise displacement for natural-looking edges
+ * instead of straight lines between vertices.
  */
+
+import { createNoise } from '../utils/noise.js';
+
+// Persistent noise generator for border displacement (seed 137 for borders)
+const borderNoise = createNoise(137);
 
 /**
  * Parse a hex color string (#rrggbb) into { r, g, b }.
@@ -25,6 +33,86 @@ function worldToScreen(wx, wy, vpX, vpY, scale) {
     sx: (wx - vpX) * scale,
     sy: (wy - vpY) * scale,
   };
+}
+
+/**
+ * Generate fractal-displaced points along a line segment between two world points.
+ * Uses simplex noise to displace points perpendicular to the edge direction.
+ *
+ * @param {number} x0 — start X (world coords)
+ * @param {number} y0 — start Y (world coords)
+ * @param {number} x1 — end X (world coords)
+ * @param {number} y1 — end Y (world coords)
+ * @param {number} amplitude — max displacement in world units
+ * @param {number} subdivisions — number of intermediate points
+ * @returns {Array<[number, number]>} — displaced intermediate points (excludes start)
+ */
+function fractalEdge(x0, y0, x1, y1, amplitude, subdivisions) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 1) return [[x1, y1]];
+
+  // Normal perpendicular to the edge
+  const nx = -dy / len;
+  const ny = dx / len;
+
+  // Noise sampling frequency — controls the "wiggliness"
+  const noiseScale = 0.003;
+
+  const points = [];
+  for (let i = 1; i <= subdivisions; i++) {
+    const t = i / subdivisions;
+    // Interpolated position along the straight edge
+    const mx = x0 + dx * t;
+    const my = y0 + dy * t;
+
+    // Taper displacement to zero at endpoints so borders connect cleanly
+    const taper = Math.sin(t * Math.PI);
+
+    // Multi-octave noise for natural look
+    const n = borderNoise.fbm(mx * noiseScale, my * noiseScale, 4, 2.0, 0.5);
+
+    // Displace perpendicular to edge
+    const disp = n * amplitude * taper;
+    points.push([mx + nx * disp, my + ny * disp]);
+  }
+
+  return points;
+}
+
+/**
+ * Build a fractal polygon path from territory vertices.
+ * Each edge is subdivided and displaced with noise.
+ *
+ * @param {Array<[number, number]>} pts — polygon vertices in world coords
+ * @param {number} scale — viewport scale (pixels per world unit)
+ * @returns {Array<[number, number]>} — all points for the fractal polygon
+ */
+function buildFractalPolygon(pts, scale) {
+  // Adapt subdivision count and amplitude to zoom level
+  // More subdivisions when zoomed in, fewer when zoomed out
+  const baseSubdivisions = Math.max(8, Math.min(40, Math.round(scale * 400)));
+  const amplitude = 120; // World units of max displacement
+
+  const allPoints = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const [x0, y0] = pts[i];
+    const [x1, y1] = pts[(i + 1) % pts.length];
+
+    // Start point
+    if (i === 0) allPoints.push([x0, y0]);
+
+    // Edge length determines actual subdivision count
+    const edgeLen = Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+    const subs = Math.max(4, Math.round(baseSubdivisions * edgeLen / 2000));
+
+    const edgePoints = fractalEdge(x0, y0, x1, y1, amplitude, subs);
+    allPoints.push(...edgePoints);
+  }
+
+  return allPoints;
 }
 
 /**
@@ -54,10 +142,12 @@ export function drawTerritories(ctx, viewport, territories, eras, currentEraInde
 
     const { r, g, b } = parseHex(ter.color || '#888888');
 
-    // Build polygon path
+    // Build fractal polygon path
+    const fractalPts = buildFractalPolygon(pts, scale);
+
     ctx.beginPath();
-    for (let i = 0; i < pts.length; i++) {
-      const { sx, sy } = worldToScreen(pts[i][0], pts[i][1], vpX, vpY, scale);
+    for (let i = 0; i < fractalPts.length; i++) {
+      const { sx, sy } = worldToScreen(fractalPts[i][0], fractalPts[i][1], vpX, vpY, scale);
       if (i === 0) {
         ctx.moveTo(sx, sy);
       } else {
@@ -67,17 +157,13 @@ export function drawTerritories(ctx, viewport, territories, eras, currentEraInde
     ctx.closePath();
 
     // Fill with transparent territory color
-    ctx.fillStyle = `rgba(${r},${g},${b},0.15)`;
+    ctx.fillStyle = `rgba(${r},${g},${b},0.12)`;
     ctx.fill();
 
-    // Stroke with dashed border
-    ctx.strokeStyle = `rgba(${r},${g},${b},0.4)`;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 4]);
+    // Stroke border — solid line for fractal borders (dashes don't look good with jagged edges)
+    ctx.strokeStyle = `rgba(${r},${g},${b},0.5)`;
+    ctx.lineWidth = 1.8;
     ctx.stroke();
-
-    // Reset line dash
-    ctx.setLineDash([]);
 
     // Draw territory name labels when zoomed in enough
     if (scale > 0.04) {
