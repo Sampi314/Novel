@@ -20,6 +20,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
   const draggingRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
+  const drawRef = useRef(null);
 
   const [currentEra, setCurrentEra] = useState(0);
 
@@ -60,7 +61,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     // Draw tiles
     const redrawCallback = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => draw());
+      rafRef.current = requestAnimationFrame(() => drawRef.current?.());
     };
     tm.drawTiles(ctx, vp, zoom, currentEra, theme, redrawCallback);
 
@@ -70,8 +71,11 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     }
   }, [currentEra, theme, data, eras]);
 
+  // Keep a stable ref to the latest draw function
+  drawRef.current = draw;
+
   // ---------------------------------------------------------------------------
-  // Resize handler
+  // Resize & visibility handler (runs once, uses drawRef for latest draw)
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -94,20 +98,31 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
       vp.height = vp.width * (rect.height / rect.width);
       vp.scale = rect.width / vp.width;
 
-      draw();
+      drawRef.current?.();
     };
 
-    // ResizeObserver fires when element transitions from display:none to visible
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(canvas.parentElement);
+    // ResizeObserver for size changes
+    const resizeObs = new ResizeObserver(handleResize);
+    resizeObs.observe(canvas.parentElement);
+
+    // IntersectionObserver to detect when the map becomes visible
+    // (display:none → block on an ancestor). This reliably fires across
+    // all browsers even when the ResizeObserver misses ancestor display changes.
+    const visibilityObs = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        handleResize();
+      }
+    });
+    visibilityObs.observe(canvas);
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => {
-      observer.disconnect();
+      resizeObs.disconnect();
+      visibilityObs.disconnect();
       window.removeEventListener('resize', handleResize);
     };
-  }, [draw]);
+  }, []); // stable — no deps, uses drawRef
 
   // ---------------------------------------------------------------------------
   // Mouse/wheel handlers
@@ -156,7 +171,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
       vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
       vp.scale = rect.width / vp.width;
 
-      draw();
+      drawRef.current?.();
     };
 
     const handleMouseDown = (e) => {
@@ -186,7 +201,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
       vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
       vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
 
-      draw();
+      drawRef.current?.();
     };
 
     const handleMouseUp = () => {
@@ -222,7 +237,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
         vp.y -= dy / vp.scale;
         vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
         vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
-        draw();
+        drawRef.current?.();
       } else if (e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -241,7 +256,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
           vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, centerX - vp.width / 2));
           vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, centerY - vp.height / 2));
           vp.scale = rect.width / newWorldWidth;
-          draw();
+          drawRef.current?.();
         }
       }
     };
@@ -265,7 +280,7 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [draw]);
+  }, []); // stable — no deps, uses drawRef
 
   // ---------------------------------------------------------------------------
   // mapZoomTarget — fly-to a specific location
@@ -295,15 +310,15 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
     vp.scale = rect.width / vp.width;
 
-    draw();
-  }, [mapZoomTarget, draw]);
+    drawRef.current?.();
+  }, [mapZoomTarget]);
 
   // ---------------------------------------------------------------------------
-  // Redraw on era change
+  // Redraw on era/theme/data change
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    draw();
-  }, [currentEra, draw]);
+    drawRef.current?.();
+  }, [currentEra, theme, data]);
 
   // ---------------------------------------------------------------------------
   // Zoom button handlers
@@ -336,8 +351,8 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
     vp.scale = rect.width / vp.width;
 
-    draw();
-  }, [draw]);
+    drawRef.current?.();
+  }, []);
 
   const handleZoomOut = useCallback(() => {
     const oldZoom = zoomRef.current;
@@ -366,8 +381,8 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
     vp.scale = rect.width / vp.width;
 
-    draw();
-  }, [draw]);
+    drawRef.current?.();
+  }, []);
 
   // ---------------------------------------------------------------------------
   // JSX
