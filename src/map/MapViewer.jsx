@@ -6,7 +6,7 @@ const WORLD_SIZE = 10000;
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 8;
 
-export default function MapViewer({ data, theme, mapZoomTarget }) {
+export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
   const canvasRef = useRef(null);
   const tileManagerRef = useRef(null);
   const viewportRef = useRef({
@@ -314,11 +314,29 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
   }, [mapZoomTarget]);
 
   // ---------------------------------------------------------------------------
-  // Redraw on era/theme/data change
+  // Redraw when becoming visible, or on era/theme/data change
   // ---------------------------------------------------------------------------
   useEffect(() => {
+    if (!isVisible) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Ensure canvas is properly sized when becoming visible
+    const rect = canvas.parentElement.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+
+      const vp = viewportRef.current;
+      vp.height = vp.width * (rect.height / rect.width);
+      vp.scale = rect.width / vp.width;
+    }
+
     drawRef.current?.();
-  }, [currentEra, theme, data]);
+  }, [isVisible, currentEra, theme, data]);
 
   // ---------------------------------------------------------------------------
   // Zoom button handlers
