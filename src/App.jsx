@@ -167,7 +167,7 @@ export default function App() {
       case 'events':     return <EventsPage data={data} onNavigate={setActiveTab} onMapNavigate={navigateToMap} />;
       case 'arcs':       return <StoryArcsPage data={data} onNavigate={setActiveTab} />;
       case 'bestiary':   return <BestiaryPage data={data} />;
-      case 'literature': return <LiteraturePage data={data} />;
+      case 'literature': return <LiteraturePage data={data} onNavigate={setActiveTab} />;
       default:           return null;
     }
   };
