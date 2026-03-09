@@ -3,7 +3,7 @@
     "dev": "concurrently \"vite\" \"cd fmg && npm run dev\"",
     "dev:app": "vite",
     "dev:fmg": "cd fmg && npm run dev",
-    "build": "vite build && cd fmg && npm run build && cp -r fmg/dist dist/fmg",
+    "build": "vite build && cd fmg && npm run build && cp -r dist ../dist/fmg",
     "preview": "vite preview"
   },
   "dependencies": {
