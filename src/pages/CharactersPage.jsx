@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader } from '../components/Ornaments';
+import CharacterCreatorModal from '../components/CharacterCreatorModal';
+import CharacterRelationshipGraph from '../components/CharacterRelationshipGraph';
+import CharacterTimeline from '../components/CharacterTimeline';
 
 const s = {
   page: {
@@ -88,7 +91,9 @@ const s = {
 export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
   const [filter, setFilter] = useState('all');
   const [searchQ, setSearchQ] = useState('');
-  const { characters = [], factions = [], locations = [] } = data;
+  const [showCreator, setShowCreator] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'graph' | 'timeline'
+  const { characters = [], factions = [], locations = [], eras = [] } = data;
 
   const factionMap = useMemo(() => {
     const m = {};
@@ -114,6 +119,27 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
     return result;
   }, [characters, filter, searchQ]);
 
+  // Build implicit relationships from shared factions, locations, and journey overlaps
+  const relationships = useMemo(() => {
+    const rels = [];
+    for (let i = 0; i < characters.length; i++) {
+      for (let j = i + 1; j < characters.length; j++) {
+        const a = characters[i], b = characters[j];
+        if (a.faction && a.faction === b.faction) {
+          rels.push({ source: a.id, target: b.id, type: 'ally', description: 'Same faction' });
+        }
+        // Journey overlap = they've been to the same place
+        const aJourney = a.journey || [];
+        const bJourney = b.journey || [];
+        const overlap = aJourney.filter(loc => bJourney.includes(loc));
+        if (overlap.length > 0 && a.faction !== b.faction) {
+          rels.push({ source: a.id, target: b.id, type: 'rival', description: `Met at ${overlap.map(id => locationMap[id]?.name || id).join(', ')}` });
+        }
+      }
+    }
+    return rels;
+  }, [characters, locationMap]);
+
   const getColor = (factionId) => factionMap[factionId]?.color || 'var(--gold)';
   const getLocName = (id) => locationMap[id]?.name || id;
 
@@ -122,37 +148,69 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
       <div className="page-watermark">{'\u4EBA'}</div>
       <PageHeader title="Nhân Vật" han="人物" subtitle={`${characters.length} nhân vật`} />
 
-      <div style={s.filters}>
-        <input
-          className="search-input"
-          style={{ width: 160 }}
-          placeholder="Tìm kiếm..."
-          value={searchQ}
-          onChange={e => setSearchQ(e.target.value)}
-        />
-        <span
-          className={`filter-pill${filter === 'all' ? ' active' : ''}`}
-          onClick={() => setFilter('all')}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={() => setShowCreator(true)}
+          style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
+            color: 'var(--bg)', border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: 1, transition: 'box-shadow 0.3s',
+          }}
+          onMouseEnter={e => e.target.style.boxShadow = 'var(--shadow-gold-strong)'}
+          onMouseLeave={e => e.target.style.boxShadow = 'none'}
         >
-          Tất cả
-        </span>
-        {factionIds.map(fid => (
-          <span
-            key={fid}
-            className={`filter-pill${filter === fid ? ' active' : ''}`}
-            style={filter === fid ? {
-              borderColor: getColor(fid),
-              color: getColor(fid),
-              background: `${getColor(fid)}22`,
-            } : undefined}
-            onClick={() => setFilter(fid)}
-          >
-            {factionMap[fid]?.name || fid}
-          </span>
+          + Tạo Nhân Vật
+        </button>
+      </div>
+
+      {/* View mode toggle */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {[{ id: 'grid', label: 'Danh sách' }, { id: 'graph', label: 'Quan hệ' }, { id: 'timeline', label: 'Dòng thời gian' }].map(m => (
+          <button key={m.id} onClick={() => setViewMode(m.id)} style={{
+            padding: '6px 14px', fontSize: 12, borderRadius: 4, cursor: 'pointer',
+            border: `1px solid ${viewMode === m.id ? 'var(--gold)' : 'var(--border)'}`,
+            background: viewMode === m.id ? 'var(--gold-glow)' : 'var(--bg-input)',
+            color: viewMode === m.id ? 'var(--gold)' : 'var(--text-dim)',
+            fontFamily: 'var(--font-body)',
+          }}>{m.label}</button>
         ))}
       </div>
 
-      <div style={s.grid}>
+      {viewMode === 'grid' && (
+        <>
+          <div style={s.filters}>
+            <input
+              className="search-input"
+              style={{ width: 160 }}
+              placeholder="Tìm kiếm..."
+              value={searchQ}
+              onChange={e => setSearchQ(e.target.value)}
+            />
+            <span
+              className={`filter-pill${filter === 'all' ? ' active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              Tất cả
+            </span>
+            {factionIds.map(fid => (
+              <span
+                key={fid}
+                className={`filter-pill${filter === fid ? ' active' : ''}`}
+                style={filter === fid ? {
+                  borderColor: getColor(fid),
+                  color: getColor(fid),
+                  background: `${getColor(fid)}22`,
+                } : undefined}
+                onClick={() => setFilter(fid)}
+              >
+                {factionMap[fid]?.name || fid}
+              </span>
+            ))}
+          </div>
+
+          <div style={s.grid}>
         {filtered.map((c, i) => {
           const color = getColor(c.faction);
           return (
@@ -201,7 +259,49 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
             </div>
           );
         })}
-      </div>
+          </div>
+        </>
+      )}
+
+      {viewMode === 'graph' && (
+        <>
+          <CharacterRelationshipGraph characters={characters} factions={factions} relationships={relationships} />
+          {/* Relationship list */}
+          <div style={{ marginTop: 16, padding: '16px 20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}>
+            <div style={{ fontSize: 14, color: 'var(--gold)', fontWeight: 600, marginBottom: 10 }}>
+              Danh sách mối quan hệ ({relationships.length})
+            </div>
+            <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+              {relationships.map((r, i) => {
+                const srcChar = characters.find(c => c.id === r.source);
+                const tgtChar = characters.find(c => c.id === r.target);
+                return (
+                  <div key={i} style={{ fontSize: 12, color: 'var(--text)', padding: '4px 0', borderBottom: '1px solid var(--border-light)' }}>
+                    <span style={{ color: getColor(srcChar?.faction) }}>{srcChar?.name}</span>
+                    {' ↔ '}
+                    <span style={{ color: getColor(tgtChar?.faction) }}>{tgtChar?.name}</span>
+                    <span style={{ color: 'var(--text-dim)', marginLeft: 8 }}>{r.type} — {r.description}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {viewMode === 'timeline' && (
+        <CharacterTimeline characters={characters} eras={eras} factions={factions} locations={locations} />
+      )}
+
+      <CharacterCreatorModal
+        isOpen={showCreator}
+        onClose={() => setShowCreator(false)}
+        data={data}
+        onCharacterSaved={() => {
+          setShowCreator(false);
+          // Data will refresh on next app load since characters come from CSV
+        }}
+      />
     </div>
   );
 }

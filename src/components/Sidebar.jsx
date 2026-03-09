@@ -24,6 +24,8 @@ export default function Sidebar({ activeTab, onTabChange, theme, onToggleTheme }
       minWidth: expanded ? 210 : 58,
       height: '100vh',
       background: 'var(--sidebar-bg)',
+      backdropFilter: 'blur(20px) saturate(1.3)',
+      WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
       borderRight: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',

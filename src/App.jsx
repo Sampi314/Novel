@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import Sidebar from './components/Sidebar';
 import MobileTabBar from './components/MobileTabBar';
 import FMGEmbed from './components/FMGEmbed';
+import StarParticles from './components/StarParticles';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ErasPage = lazy(() => import('./pages/ErasPage'));
@@ -132,23 +133,45 @@ export default function App() {
     return (
       <div style={{
         width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--bg)', color: 'var(--gold)',
+        background: 'var(--bg)', color: 'var(--gold)', position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ textAlign: 'center', animation: 'fadeIn 1s ease both' }}>
+        <StarParticles theme={theme} />
+        <div style={{ textAlign: 'center', animation: 'fadeIn 1.5s ease both', zIndex: 2 }}>
+          {/* Orbital ring */}
+          <div style={{ position: 'relative', display: 'inline-block', marginBottom: 20 }}>
+            <div className="orbital-loader" style={{ margin: '0 auto' }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: "var(--font-han)",
+              fontSize: 28,
+              color: 'var(--gold)',
+              textShadow: '0 0 30px rgba(196,163,90,0.4)',
+            }}>固</div>
+          </div>
           <div style={{
-            fontFamily: "'Playfair Display', 'Noto Serif TC', serif",
-            fontSize: 36,
+            fontFamily: "var(--font-display)",
+            fontSize: 28,
             fontWeight: 700,
-            letterSpacing: 6,
-            marginBottom: 16,
+            letterSpacing: 8,
+            marginBottom: 8,
             textShadow: '0 0 40px rgba(196,163,90,0.3)',
+            animation: 'fadeInUp 1s ease 0.3s both',
+          }}>Cố Nguyên Giới</div>
+          <div style={{
+            fontFamily: "var(--font-han)",
+            fontSize: 13,
+            color: 'var(--text-dim)',
+            letterSpacing: 6,
+            marginBottom: 20,
+            animation: 'fadeInUp 1s ease 0.5s both',
           }}>固 元 界</div>
           <div style={{
-            fontFamily: "'EB Garamond', serif",
-            fontSize: 15,
-            color: '#6a5a3a',
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: 'var(--text-dim)',
             fontStyle: 'italic',
-            animation: 'breathe 2s ease-in-out infinite',
+            animation: 'fadeInUp 1s ease 0.7s both',
           }}>Đang tải dữ liệu...</div>
         </div>
       </div>
@@ -174,8 +197,9 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
+      <StarParticles theme={theme} />
       {!isMobile && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onToggleTheme={toggleTheme} />}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', paddingBottom: isMobile ? 52 : 0 }}>
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', paddingBottom: isMobile ? 52 : 0, zIndex: 2 }}>
         {/* Map stays mounted, hidden via display */}
         <div style={{ width: '100%', height: '100%', display: activeTab === 'map' ? 'block' : 'none' }}>
           <FMGEmbed theme={theme} mapZoomTarget={mapZoomTarget} onNavigate={setActiveTab} />

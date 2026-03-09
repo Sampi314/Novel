@@ -65,6 +65,7 @@ function devFileWriterPlugin() {
 }
 
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? '/Novel/' : '/',
   plugins: [
     react(),
     devFileWriterPlugin(),

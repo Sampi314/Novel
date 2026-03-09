@@ -275,10 +275,25 @@ body {
   transition: border-color 0.25s ease, box-shadow 0.25s ease,
               transform 0.25s ease, background 0.25s ease;
   cursor: pointer;
+  position: relative;
+}
+.card-interactive::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, transparent 40%, rgba(196, 163, 90, 0.08) 60%, transparent 80%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.card-interactive:hover::before {
+  opacity: 1;
 }
 .card-interactive:hover {
   border-color: var(--border-hover);
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: var(--shadow-card-hover), 0 0 20px rgba(196, 163, 90, 0.05);
   transform: translateY(-2px);
 }
 .card-interactive:active {
@@ -403,9 +418,103 @@ body {
 }
 
 /* ══════════════════════════════════════
+   ENHANCED FOCUS & HOVER STATES
+   ══════════════════════════════════════ */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gold-dim);
+  outline-offset: 2px;
+}
+
+/* Golden glow on hover for gold-gradient buttons */
+button[style*="gold"] {
+  transition: box-shadow 0.3s ease, transform 0.15s ease;
+}
+
+/* ══════════════════════════════════════
+   ORBITAL LOADING ANIMATION
+   ══════════════════════════════════════ */
+@keyframes orbitalSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbitalGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.orbital-loader {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.orbital-loader::before,
+.orbital-loader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+}
+.orbital-loader::before {
+  border-top-color: var(--gold);
+  animation: orbitalSpin 2s linear infinite;
+}
+.orbital-loader::after {
+  border-right-color: var(--gold-dim);
+  animation: orbitalSpin 3s linear infinite reverse;
+}
+
+/* ══════════════════════════════════════
+   FROSTED GLASS PANELS
+   ══════════════════════════════════════ */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(196, 163, 90, 0.05);
+}
+
+/* ══════════════════════════════════════
+   CONSTELLATION DECORATIVE LINES
+   ══════════════════════════════════════ */
+.constellation-bg {
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(196, 163, 90, 0.04) 0, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(90, 140, 196, 0.03) 0, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(155, 127, 186, 0.02) 0, transparent 60%);
+}
+
+/* ══════════════════════════════════════
+   GOLDEN DIVIDER
+   ══════════════════════════════════════ */
+.golden-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
+  margin: 24px 0;
+  opacity: 0.5;
+}
+
+/* ══════════════════════════════════════
    THEME TRANSITION (smooth swap)
    ══════════════════════════════════════ */
 .theme-transitioning * {
   transition: background 0.5s ease, color 0.4s ease, border-color 0.4s ease,
               box-shadow 0.4s ease !important;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE MOBILE
+   ══════════════════════════════════════ */
+@media (max-width: 640px) {
+  .page-watermark {
+    font-size: 120px;
+    top: -10px;
+    right: -10px;
+  }
 }
