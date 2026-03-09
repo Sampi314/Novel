@@ -166,6 +166,8 @@ const s = {
   },
 };
 
+const base = import.meta.env.BASE_URL;
+
 export default function LiteraturePage({ data, onNavigate }) {
   const [activeCategory, setActiveCategory] = useState('tho');
   const [index, setIndex] = useState(null);
@@ -177,7 +179,7 @@ export default function LiteraturePage({ data, onNavigate }) {
   const [filterEra, setFilterEra] = useState('');
 
   useEffect(() => {
-    fetch('/data/literature-index.json')
+    fetch(base + 'data/literature-index.json')
       .then(r => r.json())
       .then(setIndex)
       .catch(() => setIndex({}));
@@ -231,7 +233,7 @@ export default function LiteraturePage({ data, onNavigate }) {
     setActiveItem(item.id);
     if (item.file) {
       setLoadingContent(true);
-      fetch(item.file)
+      fetch(base + item.file.replace(/^\//, ''))
         .then(r => r.text())
         .then(text => {
           const stripped = text.replace(/^---[\s\S]*?---\s*/, '');
@@ -249,13 +251,13 @@ export default function LiteraturePage({ data, onNavigate }) {
       const ext = file.name.split('.').pop();
       const audioPath = item.file.replace('.md', '.' + ext);
       await uploadAudio('public' + audioPath, file);
-      const idxRes = await fetch('/data/literature-index.json');
+      const idxRes = await fetch(base + 'data/literature-index.json');
       const idx = await idxRes.json();
       const entry = idx.nhac?.find(n => n.id === item.id);
       if (entry) {
         entry.audioFile = audioPath;
         await writeFile('public/data/literature-index.json', JSON.stringify(idx, null, 2) + '\n');
-        fetch('/data/literature-index.json').then(r => r.json()).then(setIndex);
+        fetch(base + 'data/literature-index.json').then(r => r.json()).then(setIndex);
       }
     } catch (err) {
       console.error('Audio upload failed:', err);
@@ -297,7 +299,7 @@ export default function LiteraturePage({ data, onNavigate }) {
 
           {/* Audio player for songs */}
           {activeCategory === 'nhac' && item.audioFile && (
-            <AudioPlayer src={item.audioFile} />
+            <AudioPlayer src={base + (item.audioFile || '').replace(/^\//, '')} />
           )}
 
           {/* Audio upload for songs without audio */}
@@ -409,7 +411,7 @@ export default function LiteraturePage({ data, onNavigate }) {
         data={data}
         onLiteratureSaved={() => {
           setShowCreator(false);
-          fetch('/data/literature-index.json')
+          fetch(base + 'data/literature-index.json')
             .then(r => r.json())
             .then(setIndex)
             .catch(() => {});

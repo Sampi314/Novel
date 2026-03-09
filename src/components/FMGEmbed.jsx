@@ -42,7 +42,7 @@ export default function FMGEmbed({ theme, mapZoomTarget, onNavigate }) {
   }, [theme, onNavigate]);
 
   const isDev = import.meta.env.DEV;
-  const fmgSrc = isDev ? 'http://localhost:5174' : '/fmg/index.html';
+  const fmgSrc = isDev ? 'http://localhost:5174' : (import.meta.env.BASE_URL + 'fmg/index.html');
 
   return (
     <iframe

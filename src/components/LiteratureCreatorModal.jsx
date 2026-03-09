@@ -297,7 +297,7 @@ Please REGENERATE ONLY the "${sectionLabel.vi}" (${sectionLabel.han}) section. K
     setStep('saving');
     setError(null);
     try {
-      const indexRes = await fetch('/data/literature-index.json');
+      const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
       const currentIndex = await indexRes.json();
       const newId = getNextLiteratureId(form.type, currentIndex);
 
@@ -372,7 +372,7 @@ Respond with ONLY the JSON object. No markdown fences.`;
       for (let i = 0; i < seriesResults.length; i++) {
         setSeriesProgress(p => ({ ...p, current: i + 1 }));
         const r = seriesResults[i];
-        const indexRes = await fetch('/data/literature-index.json');
+        const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
         const currentIndex = await indexRes.json();
         const newId = getNextLiteratureId(r.type, currentIndex);
         await saveLiterature({
@@ -436,7 +436,7 @@ Respond with ONLY the JSON object. No markdown fences.`;
       for (let i = 0; i < queueResults.length; i++) {
         setQueueProgress(p => ({ ...p, current: i + 1 }));
         const r = queueResults[i];
-        const indexRes = await fetch('/data/literature-index.json');
+        const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
         const currentIndex = await indexRes.json();
         const newId = getNextLiteratureId(r.type, currentIndex);
         await saveLiterature({

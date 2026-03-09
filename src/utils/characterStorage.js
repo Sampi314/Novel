@@ -40,7 +40,7 @@ export async function saveCharacter({
   backstory, abilities, personality,
 }) {
   // Read current CSV
-  const csvRes = await fetch('/data/characters.csv');
+  const csvRes = await fetch(import.meta.env.BASE_URL + 'data/characters.csv');
   const csvText = await csvRes.text();
   const rows = d3.csvParse(csvText);
 

@@ -56,15 +56,17 @@ export default function App() {
     setActiveTab('map');
   };
 
+  const base = import.meta.env.BASE_URL;
+
   useEffect(() => {
     Promise.all([
-      fetch('/data/world.json').then(r => r.json()),
-      fetch('/data/locations.csv').then(r => r.text()),
-      fetch('/data/characters.csv').then(r => r.text()),
-      fetch('/data/events.csv').then(r => r.text()),
-      fetch('/data/trade_routes.csv').then(r => r.text()),
-      fetch('/data/story_arcs.csv').then(r => r.text()),
-      fetch('/data/sub_races.csv').then(r => r.text()),
+      fetch(base + 'data/world.json').then(r => r.json()),
+      fetch(base + 'data/locations.csv').then(r => r.text()),
+      fetch(base + 'data/characters.csv').then(r => r.text()),
+      fetch(base + 'data/events.csv').then(r => r.text()),
+      fetch(base + 'data/trade_routes.csv').then(r => r.text()),
+      fetch(base + 'data/story_arcs.csv').then(r => r.text()),
+      fetch(base + 'data/sub_races.csv').then(r => r.text()),
     ]).then(([world, locCsv, charCsv, evCsv, trCsv, arcCsv, srCsv]) => {
       const locations = d3.csvParse(locCsv).map(l => ({
         ...l,

@@ -73,7 +73,7 @@ export async function saveLiterature({ id, type, title, description, era, relate
   const fullContent = frontmatter + '\n\n' + markdownBody;
   await writeFile(filePath, fullContent);
 
-  const indexRes = await fetch('/data/literature-index.json');
+  const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
   const index = await indexRes.json();
   const entry = {
     id,
