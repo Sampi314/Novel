@@ -1,9 +1,7 @@
 {
   "scripts": {
-    "dev": "concurrently \"vite\" \"cd fmg && npm run dev\"",
-    "dev:app": "vite",
-    "dev:fmg": "cd fmg && npm run dev",
-    "build": "vite build && cd fmg && npm run build && cp -r dist ../dist/fmg",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
