@@ -1,68 +1,10 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { TileManager } from './TileManager.js';
-import { drawTerritories } from './layers/TerritoryLayer.js';
 import { drawRivers } from './layers/RiverLayer.js';
-import { drawLeyLines } from './layers/LeyLineLayer.js';
 
 const WORLD_SIZE = 10000;
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 8;
-
-/**
- * Draw location markers onto the canvas.
- *
- * @param {CanvasRenderingContext2D} ctx
- * @param {{ x: number, y: number, width: number, height: number, scale: number }} viewport
- * @param {Array} locations — parsed location objects with x, y, name, type, era_founded, era_destroyed
- * @param {number} zoom — current integer zoom level
- */
-function drawMarkers(ctx, viewport, locations, zoom) {
-  const vpX = viewport.x;
-  const vpY = viewport.y;
-  const scale = viewport.scale;
-  const screenW = viewport.width * scale;
-  const screenH = viewport.height * scale;
-
-  const markerSize = Math.max(4, Math.min(12, 6 * Math.pow(2, zoom - 3)));
-
-  for (const loc of locations) {
-    // Convert world coords to screen coords
-    const sx = (loc.x - vpX) * scale;
-    const sy = (loc.y - vpY) * scale;
-
-    // Skip if off-screen (with some padding for label text)
-    if (sx < -60 || sy < -30 || sx > screenW + 60 || sy > screenH + 30) continue;
-
-    // At low zoom, only show capitals and sacred sites
-    if (zoom < 4) {
-      if (loc.type !== 'capital' && loc.type !== 'sacred') continue;
-    }
-
-    // Draw filled circle with stroke
-    ctx.beginPath();
-    ctx.arc(sx, sy, markerSize, 0, Math.PI * 2);
-    ctx.fillStyle = '#c4a35a';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(5, 8, 15, 0.7)';
-    ctx.lineWidth = Math.max(1, markerSize * 0.3);
-    ctx.stroke();
-
-    // Draw name label above marker at zoom >= 3
-    if (zoom >= 3) {
-      const fontSize = Math.max(11, Math.min(16, 10 + zoom));
-      ctx.font = `${fontSize}px 'EB Garamond', serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-
-      // Text shadow for readability
-      ctx.fillStyle = 'rgba(5, 8, 15, 0.75)';
-      ctx.fillText(loc.name, sx + 1, sy - markerSize - 3 + 1);
-
-      ctx.fillStyle = '#f0e6cc';
-      ctx.fillText(loc.name, sx, sy - markerSize - 3);
-    }
-  }
-}
 
 export default function MapViewer({ data, theme, mapZoomTarget }) {
   const canvasRef = useRef(null);
@@ -122,27 +64,9 @@ export default function MapViewer({ data, theme, mapZoomTarget }) {
     };
     tm.drawTiles(ctx, vp, zoom, currentEra, theme, redrawCallback);
 
-    // Draw overlay layers
-    const eraYear = eras[currentEra]?.year ?? 0;
-
-    if (data?.territories) {
-      drawTerritories(ctx, vp, data.territories, eras, currentEra);
-    }
+    // Terrain-only layers: rivers (includes ponds/lakes from terrain tiles)
     if (data?.rivers) {
       drawRivers(ctx, vp, data.rivers, zoom);
-    }
-    if (data?.leyLines) {
-      drawLeyLines(ctx, vp, data.leyLines, zoom, performance.now());
-    }
-
-    // Draw location markers if zoom >= 2
-    if (zoom >= 2 && data?.locations) {
-      const visibleLocations = data.locations.filter(loc => {
-        if (loc.era_founded > eraYear) return false;
-        if (loc.era_destroyed != null && loc.era_destroyed <= eraYear) return false;
-        return true;
-      });
-      drawMarkers(ctx, vp, visibleLocations, zoom);
     }
   }, [currentEra, theme, data, eras]);
 
