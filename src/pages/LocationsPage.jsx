@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader } from '../components/Ornaments';
+import LocationEditorModal from '../components/LocationEditorModal';
 
 const TYPE_LABELS = {
   capital: 'Kinh đô', sacred: 'Thánh địa', city: 'Thành phố', secret_realm: 'Bí cảnh',
@@ -73,6 +74,8 @@ export default function LocationsPage({ data, onNavigate, onMapNavigate }) {
   const [typeFilter, setTypeFilter] = useState('all');
   const [raceFilter, setRaceFilter] = useState('all');
   const [searchQ, setSearchQ] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const { locations = [] } = data;
 
   const types = useMemo(() => [...new Set(locations.map(l => l.type).filter(Boolean))], [locations]);
@@ -94,6 +97,23 @@ export default function LocationsPage({ data, onNavigate, onMapNavigate }) {
     <div style={s.page}>
       <div className="page-watermark">{'\u5730'}</div>
       <PageHeader title="Địa Điểm" han="地點" subtitle={`${locations.length} địa điểm`} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={() => { setEditItem(null); setShowEditor(true); }}
+          style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
+            color: 'var(--bg)', border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: 1, transition: 'box-shadow 0.3s',
+          }}
+          onMouseEnter={e => e.target.style.boxShadow = 'var(--shadow-gold-strong)'}
+          onMouseLeave={e => e.target.style.boxShadow = 'none'}
+        >
+          + Tạo Địa Điểm
+        </button>
+      </div>
 
       <div style={s.filters}>
         <input
@@ -127,7 +147,7 @@ export default function LocationsPage({ data, onNavigate, onMapNavigate }) {
         {filtered.map((loc, i) => {
           const color = TYPE_COLORS[loc.type] || '#c4a35a';
           return (
-            <div key={loc.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={s.card(color)}>
+            <div key={loc.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={{ ...s.card(color), cursor: 'pointer' }} onClick={() => { setEditItem(loc); setShowEditor(true); }}>
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span style={s.locName(color)}>{loc.name}</span>
                 <span style={s.locHan}>{loc.han}</span>
@@ -154,6 +174,14 @@ export default function LocationsPage({ data, onNavigate, onMapNavigate }) {
           );
         })}
       </div>
+
+      <LocationEditorModal
+        isOpen={showEditor}
+        onClose={() => { setShowEditor(false); setEditItem(null); }}
+        data={data}
+        editItem={editItem}
+        onSaved={() => { setShowEditor(false); setEditItem(null); window.location.reload(); }}
+      />
     </div>
   );
 }

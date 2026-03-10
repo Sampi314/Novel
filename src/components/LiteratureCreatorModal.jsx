@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { getApiKey, setApiKey, callClaude, callClaudeText } from '../utils/claudeApi.js';
-import { getNextLiteratureId, saveLiterature } from '../utils/literatureStorage.js';
+import { getNextLiteratureId, saveLiterature, deleteLiterature, updateLiterature } from '../utils/literatureStorage.js';
 
 const TYPES = [
   { id: 'tho', vi: 'Thơ', han: '詩' },
@@ -220,7 +220,8 @@ const ms = {
   genText: { color: 'var(--gold)', fontSize: 16, fontStyle: 'italic' },
 };
 
-export default function LiteratureCreatorModal({ isOpen, onClose, data, onLiteratureSaved }) {
+export default function LiteratureCreatorModal({ isOpen, onClose, data, onLiteratureSaved, editItem }) {
+  const isEdit = !!editItem;
   const [step, setStep] = useState('input');
   const [mode, setMode] = useState('single'); // 'single' | 'series' | 'queue'
   const [apiKeyInput, setApiKeyInput] = useState(getApiKey());
@@ -231,6 +232,7 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
   const [sections, setSections] = useState({ original: '', hanViet: '', translation: '', stylePrompt: '', analysis: '' });
   const [error, setError] = useState(null);
   const [regeneratingSection, setRegeneratingSection] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   // Series mode
   const [seriesForm, setSeriesForm] = useState({ type: 'tho', era: '', theme: '', count: 3 });
   const [seriesResults, setSeriesResults] = useState([]);
@@ -244,6 +246,67 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
   const characters = useMemo(() => data?.characters || [], [data]);
   const events = useMemo(() => data?.events || [], [data]);
   const locations = useMemo(() => data?.locations || [], [data]);
+
+  // Edit mode: populate from editItem
+  React.useEffect(() => {
+    if (editItem && isOpen) {
+      // Determine type from editItem context
+      const type = editItem._type || 'tho';
+      setForm({
+        type,
+        title: editItem.title || '',
+        era: editItem.era || '',
+        relatedCharacters: editItem.relatedCharacters || [],
+        relatedEvents: editItem.relatedEvents || [],
+        relatedLocations: editItem.relatedLocations || [],
+        concept: editItem.description || '',
+      });
+      setConfirmDelete(false);
+      // Load the markdown file to populate sections
+      if (editItem.file) {
+        const base = import.meta.env.BASE_URL;
+        fetch(base + editItem.file.replace(/^\//, ''))
+          .then(r => r.ok ? r.text() : '')
+          .then(md => {
+            if (!md) { setStep('review'); return; }
+            const stripped = md.replace(/^---[\s\S]*?---\s*/, '');
+            // Parse sections from markdown
+            const parsed = { original: '', hanViet: '', translation: '', stylePrompt: '', analysis: '' };
+            const sectionMap = {
+              '## 原文 Nguyên Văn': 'original',
+              '## 漢越音 Hán Việt Âm': 'hanViet',
+              '## 直譯 Trực Dịch': 'translation',
+              '## 🎹 Style Prompt': 'stylePrompt',
+              '## 析義 Phân Tích & Ý Nghĩa': 'analysis',
+            };
+            let currentKey = null;
+            for (const line of stripped.split('\n')) {
+              const trimmed = line.trim();
+              if (sectionMap[trimmed]) {
+                currentKey = sectionMap[trimmed];
+                parsed[currentKey] = '';
+              } else if (trimmed.startsWith('# ') || trimmed === '---') {
+                // Skip title and dividers
+                if (currentKey) continue;
+              } else if (currentKey) {
+                // Strip code fences
+                if (trimmed === '```' || trimmed === '```json') continue;
+                parsed[currentKey] = (parsed[currentKey] + '\n' + line).trim();
+              }
+            }
+            setSections(parsed);
+            setStep('review');
+          })
+          .catch(() => setStep('review'));
+      } else {
+        setStep('review');
+      }
+    } else if (!editItem && isOpen) {
+      setStep('input');
+      setConfirmDelete(false);
+      setSections({ original: '', hanViet: '', translation: '', stylePrompt: '', analysis: '' });
+    }
+  }, [editItem, isOpen]);
 
   const toggleArrayItem = (field, id) => {
     setForm(prev => ({
@@ -310,25 +373,54 @@ Please REGENERATE ONLY the "${sectionLabel.vi}" (${sectionLabel.han}) section. K
     setStep('saving');
     setError(null);
     try {
-      const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
-      const currentIndex = await indexRes.json();
-      const newId = getNextLiteratureId(form.type, currentIndex);
+      if (isEdit) {
+        await updateLiterature({
+          id: editItem.id,
+          type: form.type,
+          title: form.title,
+          description: form.concept.substring(0, 80),
+          era: form.era,
+          relatedCharacters: form.relatedCharacters,
+          relatedEvents: form.relatedEvents,
+          relatedLocations: form.relatedLocations,
+          tags: editItem.tags || [],
+          sections,
+        });
+      } else {
+        const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
+        const currentIndex = await indexRes.json();
+        const newId = getNextLiteratureId(form.type, currentIndex);
 
-      await saveLiterature({
-        id: newId,
-        type: form.type,
-        title: form.title,
-        description: form.concept.substring(0, 80),
-        era: form.era,
-        relatedCharacters: form.relatedCharacters,
-        relatedEvents: form.relatedEvents,
-        relatedLocations: form.relatedLocations,
-        tags: [],
-        sections,
-      });
+        await saveLiterature({
+          id: newId,
+          type: form.type,
+          title: form.title,
+          description: form.concept.substring(0, 80),
+          era: form.era,
+          relatedCharacters: form.relatedCharacters,
+          relatedEvents: form.relatedEvents,
+          relatedLocations: form.relatedLocations,
+          tags: [],
+          sections,
+        });
+      }
 
       setStep('done');
-      if (onLiteratureSaved) onLiteratureSaved(newId);
+      if (onLiteratureSaved) onLiteratureSaved(isEdit ? editItem.id : null);
+    } catch (err) {
+      setError(err.message);
+      setStep('review');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editItem) return;
+    setStep('saving');
+    setError(null);
+    try {
+      await deleteLiterature(editItem.id, form.type);
+      setStep('done');
+      if (onLiteratureSaved) onLiteratureSaved(null, true);
     } catch (err) {
       setError(err.message);
       setStep('review');
@@ -487,7 +579,7 @@ Respond with ONLY the JSON object. No markdown fences.`;
         {/* Header */}
         <div style={ms.header}>
           <div style={ms.headerWatermark}>文</div>
-          <div style={ms.title}>Tạo Tác Phẩm</div>
+          <div style={ms.title}>{isEdit ? 'Chi Tiết Tác Phẩm' : 'Tạo Tác Phẩm'}</div>
           <button style={ms.close} onClick={onClose}>&times;</button>
         </div>
 
@@ -812,7 +904,9 @@ Respond with ONLY the JSON object. No markdown fences.`;
           {step === 'done' && (
             <div style={{ ...ms.generating, gap: 12 }}>
               <div style={{ fontSize: 48, color: 'var(--gold)' }}>✓</div>
-              <div style={{ fontSize: 18, color: 'var(--gold)', fontWeight: 600 }}>Đã tạo tác phẩm thành công!</div>
+              <div style={{ fontSize: 18, color: 'var(--gold)', fontWeight: 600 }}>
+                {confirmDelete ? 'Đã xóa tác phẩm!' : isEdit ? 'Đã cập nhật tác phẩm!' : 'Đã tạo tác phẩm thành công!'}
+              </div>
               <div style={{ fontSize: 16, color: 'var(--text)' }}>{form.title}</div>
               <button onClick={onClose} style={ms.goldButton}>Đóng</button>
             </div>
@@ -869,13 +963,34 @@ Respond with ONLY the JSON object. No markdown fences.`;
 
         {step === 'review' && (
           <div style={ms.footer}>
-            <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {!isEdit && <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>}
+              {isEdit && !confirmDelete && (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  style={{ ...ms.secondaryButton, color: '#e88', borderColor: 'rgba(200,50,50,0.3)' }}
+                >
+                  Xóa
+                </button>
+              )}
+              {isEdit && confirmDelete && (
+                <>
+                  <button
+                    onClick={handleDelete}
+                    style={{ ...ms.secondaryButton, color: '#fff', background: 'rgba(200,50,50,0.8)', borderColor: 'rgba(200,50,50,0.5)' }}
+                  >
+                    Xác nhận xóa
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)} style={ms.secondaryButton}>Hủy</button>
+                </>
+              )}
+            </div>
             <button
               onClick={handleSave}
               disabled={!form.title}
               style={{ ...ms.goldButton, opacity: !form.title ? 0.4 : 1 }}
             >
-              Lưu Tác Phẩm
+              {isEdit ? 'Cập Nhật' : 'Lưu Tác Phẩm'}
             </button>
           </div>
         )}

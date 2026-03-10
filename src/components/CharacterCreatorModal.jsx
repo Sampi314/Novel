@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { getApiKey, setApiKey, callClaude } from '../utils/claudeApi.js';
-import { getNextCharacterId, saveCharacter } from '../utils/characterStorage.js';
+import { getApiKey, setApiKey, callClaude, callClaudeText } from '../utils/claudeApi.js';
+import { getNextCharacterId, saveCharacter, deleteCharacter } from '../utils/characterStorage.js';
 
 function buildCharacterSystemPrompt() {
   return `You are a character designer for Cố Nguyên Giới (固元界), an original xianxia world.
@@ -169,7 +169,8 @@ const ms = {
   },
 };
 
-export default function CharacterCreatorModal({ isOpen, onClose, data, onCharacterSaved }) {
+export default function CharacterCreatorModal({ isOpen, onClose, data, onCharacterSaved, editCharacter }) {
+  const isEdit = !!editCharacter;
   const [step, setStep] = useState('input');
   const [apiKeyInput, setApiKeyInput] = useState(getApiKey());
   const [showApiKeySettings, setShowApiKeySettings] = useState(!getApiKey());
@@ -180,6 +181,68 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
   const [portrait, setPortrait] = useState(null);
   const [error, setError] = useState(null);
   const [journeySelect, setJourneySelect] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [bioLoaded, setBioLoaded] = useState(false);
+  const [regeneratingField, setRegeneratingField] = useState(null);
+
+  // When editCharacter changes, populate and jump to review
+  React.useEffect(() => {
+    if (editCharacter && isOpen) {
+      const c = editCharacter;
+      setResult({
+        name: c.name || '',
+        han: c.han || '',
+        role: c.role || '',
+        qi_affinity: c.qi_affinity || '',
+        power: c.power || 3,
+        faction: c.faction || '',
+        era_start: c.era_start || 0,
+        era_end: c.era_end ?? '',
+        location_id: c.location_id || '',
+        journey: c.journey || [],
+        appearance: '', backstory: '', abilities: '', personality: '',
+        relationships: [],
+      });
+      setStep('review');
+      setConfirmDelete(false);
+      setBioLoaded(false);
+
+      // Fetch bio markdown if it exists
+      const base = import.meta.env.BASE_URL;
+      fetch(`${base}data/characters/${c.id}.md`)
+        .then(r => r.ok ? r.text() : '')
+        .then(md => {
+          if (!md) { setBioLoaded(true); return; }
+          // Parse sections from markdown
+          const sections = {};
+          const sectionMap = {
+            '## Ngoại hình': 'appearance',
+            '## Tiểu sử': 'backstory',
+            '## Năng lực': 'abilities',
+            '## Tính cách': 'personality',
+          };
+          let currentKey = null;
+          for (const line of md.split('\n')) {
+            if (sectionMap[line.trim()]) {
+              currentKey = sectionMap[line.trim()];
+              sections[currentKey] = '';
+            } else if (line.startsWith('## ') || line.startsWith('---')) {
+              currentKey = null;
+            } else if (currentKey) {
+              sections[currentKey] = (sections[currentKey] + '\n' + line).trim();
+            }
+          }
+          setResult(r => r ? { ...r, ...sections } : r);
+          setBioLoaded(true);
+        })
+        .catch(() => setBioLoaded(true));
+    } else if (!editCharacter && isOpen) {
+      setStep('input');
+      setResult(null);
+      setConfirmDelete(false);
+      setBioLoaded(false);
+    }
+  }, [editCharacter, isOpen]);
 
   const eras = useMemo(() => data?.eras || [], [data]);
   const factions = useMemo(() => data?.factions || [], [data]);
@@ -225,14 +288,28 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
     setStep('review');
   };
 
+  const handleDelete = async () => {
+    if (!editCharacter) return;
+    setStep('saving');
+    setError(null);
+    try {
+      await deleteCharacter(editCharacter.id);
+      setStep('done');
+      if (onCharacterSaved) onCharacterSaved(null, true);
+    } catch (err) {
+      setError(err.message);
+      setStep('review');
+    }
+  };
+
   const handleSave = async () => {
     if (!result) return;
     setStep('saving');
     setError(null);
     try {
-      const newId = getNextCharacterId(data.characters || []);
+      const charId = isEdit ? editCharacter.id : getNextCharacterId(data.characters || []);
       await saveCharacter({
-        id: newId,
+        id: charId,
         name: result.name,
         han: result.han,
         faction: result.faction,
@@ -251,11 +328,11 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
 
       if (portrait) {
         const { uploadAudio } = await import('../utils/devFileWriter.js');
-        await uploadAudio(`public/data/characters/${newId}.png`, portrait);
+        await uploadAudio(`public/data/characters/${charId}.png`, portrait);
       }
 
       setStep('done');
-      if (onCharacterSaved) onCharacterSaved(newId);
+      if (onCharacterSaved) onCharacterSaved(charId);
     } catch (err) {
       setError(err.message);
       setStep('review');
@@ -272,6 +349,43 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
     setShowApiKeySettings(false);
   };
 
+  const fieldLabels = {
+    name: 'tên nhân vật (Vietnamese)',
+    han: 'tên Hán tự (2-4 Chinese characters)',
+    role: 'vai trò / danh hiệu (Vietnamese)',
+    qi_affinity: 'khí chất (one of: tối cao, cao, trung, thấp, âm, dương, hỗn hợp)',
+    appearance: 'ngoại hình chi tiết (Vietnamese, 2-3 sentences)',
+    backstory: 'tiểu sử chi tiết (Vietnamese, 2-3 paragraphs)',
+    abilities: 'năng lực và chiêu thức (Vietnamese, 2-3 sentences)',
+    personality: 'tính cách và động lực (Vietnamese, 2-3 sentences)',
+  };
+
+  const handleRegenerateField = async (fieldKey) => {
+    if (!getApiKey() || !result) return;
+    setRegeneratingField(fieldKey);
+    try {
+      const factionObj = factions.find(f => f.id === result.faction);
+      const context = `Character: ${result.name} (${result.han}), role: ${result.role}, faction: ${factionObj?.name || result.faction}, qi: ${result.qi_affinity}, power: ${result.power}/5`;
+      const existing = Object.entries(result)
+        .filter(([k, v]) => v && ['appearance', 'backstory', 'abilities', 'personality'].includes(k) && k !== fieldKey)
+        .map(([k, v]) => `${k}: ${String(v).substring(0, 200)}`)
+        .join('\n');
+
+      const prompt = `You are a character designer for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL — no references to other novels.
+
+${context}
+${existing ? `\nExisting info:\n${existing}` : ''}
+
+Generate ONLY the ${fieldLabels[fieldKey] || fieldKey} for this character. Respond with ONLY the value, no labels, no quotes, no explanation.`;
+
+      const text = await callClaudeText({ systemPrompt: prompt, userMessage: `Generate ${fieldKey}`, maxTokens: 2048 });
+      setResult(r => r ? { ...r, [fieldKey]: text.trim() } : r);
+    } catch (err) {
+      setError(err.message);
+    }
+    setRegeneratingField(null);
+  };
+
   const addJourneyLocation = () => {
     if (!journeySelect || result.journey?.includes(journeySelect)) return;
     setResult(r => ({ ...r, journey: [...(r.journey || []), journeySelect] }));
@@ -280,6 +394,31 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
 
   const removeJourneyLocation = (index) => {
     setResult(r => ({ ...r, journey: r.journey.filter((_, i) => i !== index) }));
+  };
+
+  const RegenBtn = ({ field }) => {
+    const isLoading = regeneratingField === field;
+    const hasKey = !!getApiKey();
+    return (
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          if (!hasKey) { setShowApiKeySettings(true); setError('Cần API key để dùng AI'); return; }
+          handleRegenerateField(field);
+        }}
+        disabled={isLoading || !!regeneratingField}
+        title={hasKey ? 'Tạo lại bằng AI' : 'Cần API key'}
+        style={{
+          background: 'none', border: '1px solid var(--border)', borderRadius: 4,
+          color: isLoading ? 'var(--gold)' : 'var(--text-dim)', cursor: isLoading ? 'wait' : 'pointer',
+          fontSize: 11, padding: '2px 8px', marginLeft: 6, fontFamily: 'var(--font-body)',
+          opacity: regeneratingField && !isLoading ? 0.3 : 1,
+          transition: 'all 0.2s',
+        }}
+      >
+        {isLoading ? '...' : 'AI'}
+      </button>
+    );
   };
 
   if (!isOpen) return null;
@@ -302,14 +441,14 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
       <div style={ms.modal}>
         <div style={ms.header}>
           <div style={ms.headerWatermark}>人</div>
-          <div style={ms.title}>Tạo Nhân Vật</div>
+          <div style={ms.title}>{isEdit ? 'Chi Tiết Nhân Vật' : 'Tạo Nhân Vật'}</div>
           <button style={ms.close} onClick={onClose}>&times;</button>
         </div>
 
         <div style={ms.body}>
           {error && <div style={ms.error}>{error}</div>}
 
-          {showApiKeySettings && step === 'input' && (
+          {showApiKeySettings && (step === 'input' || step === 'review') && (
             <div style={{ ...ms.fieldGroup, padding: 16, background: 'var(--gold-glow)', borderRadius: 8, border: '1px solid var(--border)' }}>
               <div style={ms.label}>Anthropic API Key <span style={{ color: 'var(--text-dim)' }}>(chỉ cần cho AI)</span></div>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -390,16 +529,16 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '2fr 1fr' }}>
                     <div>
-                      <div style={ms.label}>Tên</div>
+                      <div style={ms.label}>Tên <RegenBtn field="name" /></div>
                       <input value={result.name} onChange={e => setResult(r => ({ ...r, name: e.target.value }))} style={ms.input} placeholder="Tên nhân vật" />
                     </div>
                     <div>
-                      <div style={ms.label}>Hán tự</div>
+                      <div style={ms.label}>Hán tự <RegenBtn field="han" /></div>
                       <input value={result.han} onChange={e => setResult(r => ({ ...r, han: e.target.value }))} style={ms.input} placeholder="漢字" />
                     </div>
                   </div>
                   <div style={{ marginTop: 10 }}>
-                    <div style={ms.label}>Vai trò / Danh hiệu</div>
+                    <div style={ms.label}>Vai trò / Danh hiệu <RegenBtn field="role" /></div>
                     <input value={result.role} onChange={e => setResult(r => ({ ...r, role: e.target.value }))} style={ms.input} placeholder="VD: Tộc Trưởng, Kiếm Sĩ, Trưởng Lão..." />
                   </div>
                 </div>
@@ -415,7 +554,7 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
                   </select>
                 </div>
                 <div>
-                  <div style={ms.label}>Khí chất</div>
+                  <div style={ms.label}>Khí chất <RegenBtn field="qi_affinity" /></div>
                   <select value={result.qi_affinity} onChange={e => setResult(r => ({ ...r, qi_affinity: e.target.value }))} style={ms.select}>
                     <option value="">— Chọn —</option>
                     {['tối cao', 'cao', 'trung', 'thấp', 'âm', 'dương', 'hỗn hợp'].map(q => (
@@ -481,8 +620,9 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
                 { key: 'personality', label: 'Tính cách', han: '性', placeholder: 'Đặc điểm tính cách, động lực, sở thích, điểm yếu...' },
               ].map(sec => (
                 <div key={sec.key} style={ms.sectionCard}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--gold)', marginBottom: 8 }}>
-                    {sec.label} <span style={{ fontSize: 11, color: 'var(--gold-dim)', fontFamily: 'var(--font-han)' }}>{sec.han}</span>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--gold)', marginBottom: 8, display: 'flex', alignItems: 'center' }}>
+                    {sec.label} <span style={{ fontSize: 11, color: 'var(--gold-dim)', fontFamily: 'var(--font-han)', marginLeft: 4 }}>{sec.han}</span>
+                    <RegenBtn field={sec.key} />
                   </div>
                   <textarea
                     value={result[sec.key] || ''}
@@ -564,8 +704,10 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
           {step === 'done' && (
             <div style={{ ...ms.generating, gap: 12 }}>
               <div style={{ fontSize: 48, color: 'var(--gold)' }}>✓</div>
-              <div style={{ fontSize: 18, color: 'var(--gold)', fontWeight: 600 }}>Đã tạo nhân vật thành công!</div>
-              <div style={{ fontSize: 16, color: 'var(--text)' }}>{result?.name} ({result?.han})</div>
+              <div style={{ fontSize: 18, color: 'var(--gold)', fontWeight: 600 }}>
+                {confirmDelete ? 'Đã xóa nhân vật!' : isEdit ? 'Đã cập nhật nhân vật!' : 'Đã tạo nhân vật thành công!'}
+              </div>
+              {!confirmDelete && <div style={{ fontSize: 16, color: 'var(--text)' }}>{result?.name} ({result?.han})</div>}
               <button onClick={onClose} style={ms.goldButton}>Đóng</button>
             </div>
           )}
@@ -591,8 +733,31 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
 
         {step === 'review' && (
           <div style={ms.footer}>
-            <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>
-            <button onClick={handleSave} disabled={!canSave} style={{ ...ms.goldButton, opacity: canSave ? 1 : 0.4 }}>Lưu Nhân Vật</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {!isEdit && <button onClick={() => setStep('input')} style={ms.secondaryButton}>← Quay lại</button>}
+              {isEdit && !confirmDelete && (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  style={{ ...ms.secondaryButton, color: '#e88', borderColor: 'rgba(200,50,50,0.3)' }}
+                >
+                  Xóa
+                </button>
+              )}
+              {isEdit && confirmDelete && (
+                <>
+                  <button
+                    onClick={handleDelete}
+                    style={{ ...ms.secondaryButton, color: '#fff', background: 'rgba(200,50,50,0.8)', borderColor: 'rgba(200,50,50,0.5)' }}
+                  >
+                    Xác nhận xóa
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)} style={ms.secondaryButton}>Hủy</button>
+                </>
+              )}
+            </div>
+            <button onClick={handleSave} disabled={!canSave} style={{ ...ms.goldButton, opacity: canSave ? 1 : 0.4 }}>
+              {isEdit ? 'Cập Nhật' : 'Lưu Nhân Vật'}
+            </button>
           </div>
         )}
       </div>

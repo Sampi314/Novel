@@ -14,7 +14,7 @@ import { createNoise } from '../utils/noise.js';
 import { tileToWorld, tileWorldSize, BASE_SEED } from '../WorldSeed.js';
 import { getBiomeColor } from '../utils/colors.js';
 
-const TILE_SIZE = 256;
+const TILE_SIZE = 512;
 const PADDED = TILE_SIZE + 2; // 1px border for hillshade normals
 
 const WORLD_CENTER = 5000;

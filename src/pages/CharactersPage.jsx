@@ -92,6 +92,7 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
   const [filter, setFilter] = useState('all');
   const [searchQ, setSearchQ] = useState('');
   const [showCreator, setShowCreator] = useState(false);
+  const [editChar, setEditChar] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'graph' | 'timeline'
   const { characters = [], factions = [], locations = [], eras = [] } = data;
 
@@ -150,7 +151,7 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <button
-          onClick={() => setShowCreator(true)}
+          onClick={() => { setEditChar(null); setShowCreator(true); }}
           style={{
             padding: '10px 24px',
             background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
@@ -214,7 +215,7 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
         {filtered.map((c, i) => {
           const color = getColor(c.faction);
           return (
-            <div key={c.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={s.card(color)}>
+            <div key={c.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={{ ...s.card(color), cursor: 'pointer' }} onClick={() => { setEditChar(c); setShowCreator(true); }}>
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span style={s.charName(color)}>{c.name}</span>
                 <span style={s.charHan}>{c.han}</span>
@@ -295,11 +296,14 @@ export default function CharactersPage({ data, onNavigate, onMapNavigate }) {
 
       <CharacterCreatorModal
         isOpen={showCreator}
-        onClose={() => setShowCreator(false)}
+        onClose={() => { setShowCreator(false); setEditChar(null); }}
         data={data}
-        onCharacterSaved={() => {
+        editCharacter={editChar}
+        onCharacterSaved={(id, wasDeleted) => {
           setShowCreator(false);
-          // Data will refresh on next app load since characters come from CSV
+          setEditChar(null);
+          // Reload to refresh data from CSV
+          window.location.reload();
         }}
       />
     </div>

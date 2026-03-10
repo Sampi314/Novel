@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader } from '../components/Ornaments';
+import EventEditorModal from '../components/EventEditorModal';
 
 const TYPE_COLORS = { battle: '#ff4444', founded: '#44ff88', destroyed: '#ff8844', lore: '#ffd700', custom: '#88aaff' };
 const TYPE_LABELS = { battle: 'Chiến trận', founded: 'Thành lập', destroyed: 'Hủy diệt', lore: 'Truyền thuyết', custom: 'Tùy chọn' };
@@ -107,6 +108,8 @@ const s = {
 
 export default function EventsPage({ data, onNavigate, onMapNavigate }) {
   const [searchQ, setSearchQ] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const { events = [], eras = [], factions = [] } = data;
 
   const factionMap = useMemo(() => {
@@ -141,6 +144,24 @@ export default function EventsPage({ data, onNavigate, onMapNavigate }) {
     <div style={s.page}>
       <div className="page-watermark">事</div>
       <PageHeader title="Sự Kiện" han="事件" subtitle={`${events.length} sự kiện lịch sử`} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={() => { setEditItem(null); setShowEditor(true); }}
+          style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
+            color: 'var(--bg)', border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: 1, transition: 'box-shadow 0.3s',
+          }}
+          onMouseEnter={e => e.target.style.boxShadow = 'var(--shadow-gold-strong)'}
+          onMouseLeave={e => e.target.style.boxShadow = 'none'}
+        >
+          + Tạo Sự Kiện
+        </button>
+      </div>
+
       <input
         className="search-input"
         style={{ width: 200, marginBottom: 20 }}
@@ -161,7 +182,7 @@ export default function EventsPage({ data, onNavigate, onMapNavigate }) {
               const typeColor = TYPE_COLORS[ev.type] || '#c4a35a';
               const evFactions = ev.factions ? ev.factions.split('|') : [];
               return (
-                <div key={ev.id} className="card-interactive card-reveal" style={s.card(typeColor)}>
+                <div key={ev.id} className="card-interactive card-reveal" style={{ ...s.card(typeColor), cursor: 'pointer' }} onClick={() => { setEditItem(ev); setShowEditor(true); }}>
                   <div style={s.dot(typeColor)} />
                   <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap' }}>
                     <span style={s.eventName}>{ev.name}</span>
@@ -196,6 +217,14 @@ export default function EventsPage({ data, onNavigate, onMapNavigate }) {
           </div>
         </div>
       ))}
+
+      <EventEditorModal
+        isOpen={showEditor}
+        onClose={() => { setShowEditor(false); setEditItem(null); }}
+        data={data}
+        editItem={editItem}
+        onSaved={() => { setShowEditor(false); setEditItem(null); window.location.reload(); }}
+      />
     </div>
   );
 }

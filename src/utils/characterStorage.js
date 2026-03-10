@@ -28,6 +28,20 @@ ${faction}
   return md;
 }
 
+export async function deleteCharacter(id) {
+  const csvRes = await fetch(import.meta.env.BASE_URL + 'data/characters.csv');
+  const csvText = await csvRes.text();
+  const rows = d3.csvParse(csvText).filter(r => r.id !== id);
+
+  const header = 'id,name,han,faction,role,qi_affinity,power,era_start,era_end,location_id,journey';
+  const lines = rows.map(r =>
+    [r.id, r.name, r.han, r.faction, r.role, r.qi_affinity, r.power, r.era_start, r.era_end, r.location_id, r.journey].join(',')
+  );
+  const newCsv = header + '\n' + lines.join('\n') + '\n';
+  await writeFile('public/data/characters.csv', newCsv);
+  return id;
+}
+
 export async function saveCharacter({
   id, name, han, faction, role, qi_affinity, power,
   era_start, era_end, location_id, journey,

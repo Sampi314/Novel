@@ -175,6 +175,7 @@ export default function LiteraturePage({ data, onNavigate }) {
   const [content, setContent] = useState('');
   const [loadingContent, setLoadingContent] = useState(false);
   const [showCreator, setShowCreator] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterEra, setFilterEra] = useState('');
 
@@ -266,7 +267,19 @@ export default function LiteraturePage({ data, onNavigate }) {
 
   const renderItemCard = (item, i) => (
     <div key={item.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={s.item(activeItem === item.id)} onClick={() => loadContent(item)}>
-      <div style={s.itemTitle}>{item.title}</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={s.itemTitle}>{item.title}</div>
+        <button
+          onClick={(e) => { e.stopPropagation(); setEditItem({ ...item, _type: activeCategory }); setShowCreator(true); }}
+          style={{
+            padding: '4px 12px', fontSize: 11, borderRadius: 4, cursor: 'pointer',
+            border: '1px solid var(--border)', background: 'transparent',
+            color: 'var(--gold-dim)', fontFamily: 'var(--font-body)',
+          }}
+        >
+          Sửa
+        </button>
+      </div>
       {item.description && <div style={s.itemDesc}>{item.description}</div>}
 
       {/* Metadata chips — clickable cross-references */}
@@ -332,7 +345,7 @@ export default function LiteraturePage({ data, onNavigate }) {
       {/* Create button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <button
-          onClick={() => setShowCreator(true)}
+          onClick={() => { setEditItem(null); setShowCreator(true); }}
           style={{
             padding: '10px 24px',
             background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
@@ -407,10 +420,12 @@ export default function LiteraturePage({ data, onNavigate }) {
 
       <LiteratureCreatorModal
         isOpen={showCreator}
-        onClose={() => setShowCreator(false)}
+        onClose={() => { setShowCreator(false); setEditItem(null); }}
         data={data}
+        editItem={editItem}
         onLiteratureSaved={() => {
           setShowCreator(false);
+          setEditItem(null);
           fetch(base + 'data/literature-index.json')
             .then(r => r.json())
             .then(setIndex)

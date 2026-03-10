@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader, OrnamentalCorner } from '../components/Ornaments';
+import StoryArcEditorModal from '../components/StoryArcEditorModal';
 
 const s = {
   page: {
@@ -70,6 +71,8 @@ const s = {
 export default function StoryArcsPage({ data, onNavigate }) {
   const [activeArc, setActiveArc] = useState(null);
   const [searchQ, setSearchQ] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const { storyArcs = [], events = [], characters = [], factions = [] } = data;
 
   const eventMap = useMemo(() => {
@@ -94,6 +97,24 @@ export default function StoryArcsPage({ data, onNavigate }) {
     <div style={s.page}>
       <div className="page-watermark">故</div>
       <PageHeader title="Cốt Truyện" han="故事" subtitle={`${storyArcs.length} tuyến truyện`} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={() => { setEditItem(null); setShowEditor(true); }}
+          style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
+            color: 'var(--bg)', border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: 1, transition: 'box-shadow 0.3s',
+          }}
+          onMouseEnter={e => e.target.style.boxShadow = 'var(--shadow-gold-strong)'}
+          onMouseLeave={e => e.target.style.boxShadow = 'none'}
+        >
+          + Tạo Cốt Truyện
+        </button>
+      </div>
+
       <input
         className="search-input"
         style={{ width: 200, marginBottom: 20 }}
@@ -125,6 +146,18 @@ export default function StoryArcsPage({ data, onNavigate }) {
 
             {active && (
               <>
+                <div style={{ marginTop: 10, marginBottom: 6 }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditItem(arc); setShowEditor(true); }}
+                    style={{
+                      padding: '6px 16px', fontSize: 12, borderRadius: 4, cursor: 'pointer',
+                      border: '1px solid var(--gold)', background: 'var(--gold-glow)',
+                      color: 'var(--gold)', fontFamily: 'var(--font-body)',
+                    }}
+                  >
+                    Chỉnh sửa
+                  </button>
+                </div>
                 {arc.events && arc.events.length > 0 && (
                   <div style={s.section}>
                     <div style={s.label}>Sự kiện liên quan:</div>
@@ -160,6 +193,14 @@ export default function StoryArcsPage({ data, onNavigate }) {
           </div>
         );
       })}
+
+      <StoryArcEditorModal
+        isOpen={showEditor}
+        onClose={() => { setShowEditor(false); setEditItem(null); }}
+        data={data}
+        editItem={editItem}
+        onSaved={() => { setShowEditor(false); setEditItem(null); window.location.reload(); }}
+      />
     </div>
   );
 }

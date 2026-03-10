@@ -95,3 +95,52 @@ export async function saveLiterature({ id, type, title, description, era, relate
 
   return { id, filePath };
 }
+
+export async function deleteLiterature(id, type) {
+  const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
+  const index = await indexRes.json();
+  if (index[type]) {
+    index[type] = index[type].filter(item => item.id !== id);
+  }
+  await writeFile('public/data/literature-index.json', JSON.stringify(index, null, 2) + '\n');
+  return id;
+}
+
+export async function updateLiterature({ id, type, title, description, era, relatedCharacters, relatedEvents, relatedLocations, tags, sections }) {
+  const indexRes = await fetch(import.meta.env.BASE_URL + 'data/literature-index.json');
+  const index = await indexRes.json();
+  const items = index[type] || [];
+  const idx = items.findIndex(item => item.id === id);
+  if (idx < 0) throw new Error('Không tìm thấy tác phẩm');
+
+  const oldEntry = items[idx];
+  const folder = TYPE_FOLDERS[type];
+  const filePath = `public/data/${folder}/${era}/${title}.md`;
+
+  const entry = {
+    ...oldEntry,
+    title,
+    description: description || '',
+    era,
+    file: `/data/${folder}/${era}/${title}.md`,
+    relatedCharacters: relatedCharacters || [],
+    relatedEvents: relatedEvents || [],
+    relatedLocations: relatedLocations || [],
+    tags: tags || [],
+  };
+  if (type === 'nhac' && sections?.audioFile) {
+    entry.audioFile = sections.audioFile;
+  }
+  items[idx] = entry;
+  index[type] = items;
+  await writeFile('public/data/literature-index.json', JSON.stringify(index, null, 2) + '\n');
+
+  if (sections) {
+    const frontmatter = buildFrontmatter({ type, title, era, relatedCharacters, relatedEvents, relatedLocations });
+    const markdownBody = buildMarkdownContent({ title, sections, type });
+    const fullContent = frontmatter + '\n\n' + markdownBody;
+    await writeFile(filePath, fullContent);
+  }
+
+  return { id, filePath };
+}

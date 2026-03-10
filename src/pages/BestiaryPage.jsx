@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PageHeader } from '../components/Ornaments';
+import BestiaryEditorModal from '../components/BestiaryEditorModal';
 
 const BIOME_LABELS = {
   mountain: 'Sơn Lĩnh', tundra: 'Băng Nguyên', lake: 'Hồ Trạch', forest: 'Sơn Lâm',
@@ -79,6 +80,8 @@ const s = {
 export default function BestiaryPage({ data }) {
   const [biomeFilter, setBiomeFilter] = useState('all');
   const [searchQ, setSearchQ] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const { fauna = [] } = data;
 
   const biomes = useMemo(() => [...new Set(fauna.map(f => f.biome).filter(Boolean))], [fauna]);
@@ -97,6 +100,23 @@ export default function BestiaryPage({ data }) {
     <div style={s.page}>
       <div className="page-watermark">獸</div>
       <PageHeader title="Linh Thú" han="靈獸" subtitle={`${fauna.length} linh thú`} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={() => { setEditItem(null); setShowEditor(true); }}
+          style={{
+            padding: '10px 24px',
+            background: 'linear-gradient(135deg, var(--gold-dim), var(--gold))',
+            color: 'var(--bg)', border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: 1, transition: 'box-shadow 0.3s',
+          }}
+          onMouseEnter={e => e.target.style.boxShadow = 'var(--shadow-gold-strong)'}
+          onMouseLeave={e => e.target.style.boxShadow = 'none'}
+        >
+          + Tạo Linh Thú
+        </button>
+      </div>
 
       <div style={s.filters}>
         <input
@@ -123,7 +143,7 @@ export default function BestiaryPage({ data }) {
         {filtered.map((f, i) => {
           const color = BIOME_COLORS[f.biome] || '#c4a35a';
           return (
-            <div key={f.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={s.card(color)}>
+            <div key={f.id} className={`card-interactive card-reveal stagger-${(i % 12) + 1}`} style={{ ...s.card(color), cursor: 'pointer' }} onClick={() => { setEditItem(f); setShowEditor(true); }}>
               <div style={s.icon}>{ICON_MAP[f.icon] || '?'}</div>
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span style={s.name(color)}>{f.name}</span>
@@ -141,6 +161,14 @@ export default function BestiaryPage({ data }) {
           );
         })}
       </div>
+
+      <BestiaryEditorModal
+        isOpen={showEditor}
+        onClose={() => { setShowEditor(false); setEditItem(null); }}
+        data={data}
+        editItem={editItem}
+        onSaved={() => { setShowEditor(false); setEditItem(null); window.location.reload(); }}
+      />
     </div>
   );
 }

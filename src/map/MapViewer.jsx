@@ -53,6 +53,9 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
     // Scale context for HiDPI
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    // Disable image smoothing for crisp tile rendering
+    ctx.imageSmoothingEnabled = false;
+
     // Clear with background color
     const bgColor = theme === 'light' ? '#f4ede0' : '#05080f';
     ctx.fillStyle = bgColor;

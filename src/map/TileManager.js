@@ -11,7 +11,7 @@
 
 import { TileCache } from './utils/tileCache.js';
 
-const TILE_SIZE = 256;
+const TILE_SIZE = 512;
 
 export class TileManager {
   constructor() {
