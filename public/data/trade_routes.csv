@@ -1,4 +1,4 @@
-id,name,type,waypoints,era_start,era_end,description
+id,name,han,type,waypoints,era_start,era_end,description
 tr01,Thiên Long Thương Lộ,天龍商路,land,2500:1500|3200:2200|3800:3000|4500:4200|5000:5000,0,,Con đường thương mại cổ xưa nối Thiên Sơn với Cố Nguyên Thành qua Bạch Ngọc Kinh.
 tr02,Trung Nguyên Đại Lộ,中原大路,land,5000:5000|5100:4200|5150:3400|5100:2500|5050:1600|5200:900,40000,,Trục đường chính nối kinh đô với các thành phố cực bắc.
 tr03,Đông Hải Thương Tuyến,東海商線,sea,5000:5000|5800:4800|6500:4500|7500:4200|8600:5000|8800:3500,100000,,Tuyến hàng hải nối Cố Nguyên Thành với các cảng phía đông.

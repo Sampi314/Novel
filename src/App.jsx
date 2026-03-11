@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import * as d3 from 'd3';
 import Sidebar from './components/Sidebar';
-import MobileTabBar from './components/MobileTabBar';
+import MobileDrawer from './components/MobileDrawer';
 import FMGEmbed from './components/FMGEmbed';
 import MapViewer from './map/MapViewer';
 import StarParticles from './components/StarParticles';
@@ -89,8 +89,8 @@ export default function App() {
       const tradeRoutes = d3.csvParse(trCsv).map(r => ({
         ...r,
         era_start: +r.era_start,
-        era_end: r.era_end === '' ? null : +r.era_end,
-        pts: r.waypoints.split('|').map(w => w.split(':').map(Number)),
+        era_end: r.era_end === '' || r.era_end == null ? null : +r.era_end,
+        pts: r.waypoints ? r.waypoints.split('|').map(w => w.split(':').map(Number)) : [],
       }));
       const storyArcs = d3.csvParse(arcCsv).map(a => ({
         ...a,
@@ -202,7 +202,7 @@ export default function App() {
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
       <StarParticles theme={theme} />
       {!isMobile && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onToggleTheme={toggleTheme} />}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', paddingBottom: isMobile ? 52 : 0, zIndex: 2 }}>
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', zIndex: 2 }}>
         {/* Map stays mounted, hidden via display */}
         <div style={{ width: '100%', height: '100%', display: activeTab === 'map' ? 'block' : 'none' }}>
           <MapViewer data={data} theme={theme} mapZoomTarget={mapZoomTarget} isVisible={activeTab === 'map'} />
@@ -216,7 +216,7 @@ export default function App() {
           </div>
         )}
       </div>
-      {isMobile && <MobileTabBar activeTab={activeTab} onTabChange={setActiveTab} />}
+      {isMobile && <MobileDrawer activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onToggleTheme={toggleTheme} />}
     </div>
   );
 }

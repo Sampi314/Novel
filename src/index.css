@@ -517,4 +517,24 @@ button[style*="gold"] {
     top: -10px;
     right: -10px;
   }
+
+  /* Safe areas for notched devices */
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Performance: reduce blur on mobile */
+  .card-interactive,
+  .card-reveal {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Scrollable panels get native smooth scroll */
+  .page-transition {
+    -webkit-overflow-scrolling: touch;
+  }
 }

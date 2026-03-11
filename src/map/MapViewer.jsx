@@ -1,6 +1,8 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { TileManager } from './TileManager.js';
 import { drawRivers } from './layers/RiverLayer.js';
+import { drawRoads } from './layers/RoadLayer.js';
+import { generateRoadNetwork } from './generators/RoadGenerator.js';
 
 const WORLD_SIZE = 10000;
 const MIN_ZOOM = 0;
@@ -21,10 +23,22 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
   const drawRef = useRef(null);
+  const dataRef = useRef(null);
+  dataRef.current = data;
 
   const [currentEra, setCurrentEra] = useState(0);
+  const [locationTooltip, setLocationTooltip] = useState(null);
 
   const eras = data?.eras || [];
+
+  // Generate road network once from locations (deterministic, cached)
+  const generatedRoads = useMemo(() => {
+    if (!data?.locations || data.locations.length < 2) return [];
+    return generateRoadNetwork(data.locations);
+  }, [data?.locations]);
+
+  // Current era year for filtering era-dependent features
+  const currentEraYear = eras[currentEra]?.year ?? null;
 
   // ---------------------------------------------------------------------------
   // Initialize TileManager
@@ -72,7 +86,10 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
     if (data?.rivers) {
       drawRivers(ctx, vp, data.rivers, zoom);
     }
-  }, [currentEra, theme, data, eras]);
+
+    // Roads and trade routes (drawn on top of rivers)
+    drawRoads(ctx, vp, generatedRoads, data?.tradeRoutes, zoom, theme, currentEraYear);
+  }, [currentEra, theme, data, eras, generatedRoads, currentEraYear]);
 
   // Keep a stable ref to the latest draw function
   drawRef.current = draw;
@@ -128,53 +145,52 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
   }, []); // stable — no deps, uses drawRef
 
   // ---------------------------------------------------------------------------
-  // Mouse/wheel handlers
+  // Mouse/wheel + touch gesture handlers
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handleWheel = (e) => {
-      e.preventDefault();
-
-      const vp = viewportRef.current;
+    // --- Helper: zoom toward a specific screen point ---
+    function zoomTowardPoint(screenX, screenY, newZoom) {
       const rect = canvas.getBoundingClientRect();
+      const vp = viewportRef.current;
 
-      // Mouse position in screen pixels relative to canvas
-      const mouseScreenX = e.clientX - rect.left;
-      const mouseScreenY = e.clientY - rect.top;
+      // Point in world coordinates before zoom
+      const worldX = vp.x + screenX / vp.scale;
+      const worldY = vp.y + screenY / vp.scale;
 
-      // Mouse position in world coordinates
-      const mouseWorldX = vp.x + mouseScreenX / vp.scale;
-      const mouseWorldY = vp.y + mouseScreenY / vp.scale;
-
-      // Adjust zoom
-      const oldZoom = zoomRef.current;
-      const delta = e.deltaY > 0 ? -1 : 1;
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, oldZoom + delta));
-
-      if (newZoom === oldZoom) return;
       zoomRef.current = newZoom;
 
-      // Calculate new world dimensions
       const newWorldWidth = WORLD_SIZE / Math.pow(2, newZoom);
       const aspectRatio = rect.height / rect.width;
       const newWorldHeight = newWorldWidth * aspectRatio;
 
-      // Keep mouse position fixed in world coords (zoom toward cursor)
-      const mouseRatioX = mouseScreenX / rect.width;
-      const mouseRatioY = mouseScreenY / rect.height;
-      vp.x = mouseWorldX - mouseRatioX * newWorldWidth;
-      vp.y = mouseWorldY - mouseRatioY * newWorldHeight;
+      // Keep the point fixed on screen
+      const ratioX = screenX / rect.width;
+      const ratioY = screenY / rect.height;
+      vp.x = worldX - ratioX * newWorldWidth;
+      vp.y = worldY - ratioY * newWorldHeight;
       vp.width = newWorldWidth;
       vp.height = newWorldHeight;
 
-      // Clamp viewport to world bounds
       vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
       vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
       vp.scale = rect.width / vp.width;
 
       drawRef.current?.();
+    }
+
+    // ===================== MOUSE HANDLERS =====================
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const oldZoom = zoomRef.current;
+      const delta = e.deltaY > 0 ? -1 : 1;
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, oldZoom + delta));
+      if (newZoom === oldZoom) return;
+      zoomTowardPoint(e.clientX - rect.left, e.clientY - rect.top, newZoom);
     };
 
     const handleMouseDown = (e) => {
@@ -186,24 +202,15 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
 
     const handleMouseMove = (e) => {
       if (!draggingRef.current) return;
-
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
 
       const vp = viewportRef.current;
-
-      // Convert screen pixel delta to world units
-      const worldDx = dx / vp.scale;
-      const worldDy = dy / vp.scale;
-
-      vp.x -= worldDx;
-      vp.y -= worldDy;
-
-      // Clamp
+      vp.x -= dx / vp.scale;
+      vp.y -= dy / vp.scale;
       vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
       vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
-
       drawRef.current?.();
     };
 
@@ -212,29 +219,183 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
       canvas.style.cursor = 'grab';
     };
 
-    // Touch support
-    let touchStartDist = 0;
-    let touchStartZoom = 0;
+    // ===================== TOUCH STATE =====================
+
+    // Pinch state
+    let pinchStartDist = 0;
+    let pinchStartZoom = 0;
+    let pinchStartMidScreenX = 0;
+    let pinchStartMidScreenY = 0;
+    let pinchStartMidWorldX = 0;
+    let pinchStartMidWorldY = 0;
+
+    // Momentum state
+    let velocityX = 0;
+    let velocityY = 0;
+    let momentumRaf = null;
+    const FRICTION = 0.93;
+    const MIN_VELOCITY = 0.3;
+    const touchHistory = []; // { x, y, time } circular buffer
+
+    // Double-tap detection
+    let lastTapTime = 0;
+    let lastTapX = 0;
+    let lastTapY = 0;
+    const DOUBLE_TAP_DELAY = 300;
+    const DOUBLE_TAP_DIST = 30;
+
+    // Long-press detection
+    let longPressTimer = null;
+    let longPressTriggered = false;
+    const LONG_PRESS_DELAY = 500;
+    const LONG_PRESS_MOVE_THRESHOLD = 10;
+    let longPressStartX = 0;
+    let longPressStartY = 0;
+
+    function cancelMomentum() {
+      if (momentumRaf) {
+        cancelAnimationFrame(momentumRaf);
+        momentumRaf = null;
+      }
+      velocityX = 0;
+      velocityY = 0;
+    }
+
+    function cancelLongPress() {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }
+
+    function startMomentum() {
+      // Compute velocity from touch history
+      if (touchHistory.length < 2) return;
+      const recent = touchHistory[touchHistory.length - 1];
+      const older = touchHistory[Math.max(0, touchHistory.length - 3)];
+      const dt = (recent.time - older.time) || 1;
+      velocityX = (recent.x - older.x) / dt * 16; // normalize to ~60fps
+      velocityY = (recent.y - older.y) / dt * 16;
+
+      if (Math.abs(velocityX) < MIN_VELOCITY && Math.abs(velocityY) < MIN_VELOCITY) return;
+
+      function tick() {
+        velocityX *= FRICTION;
+        velocityY *= FRICTION;
+        if (Math.abs(velocityX) < MIN_VELOCITY && Math.abs(velocityY) < MIN_VELOCITY) {
+          momentumRaf = null;
+          return;
+        }
+        const vp = viewportRef.current;
+        vp.x -= velocityX / vp.scale;
+        vp.y -= velocityY / vp.scale;
+        vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
+        vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
+        drawRef.current?.();
+        momentumRaf = requestAnimationFrame(tick);
+      }
+      momentumRaf = requestAnimationFrame(tick);
+    }
+
+    function findNearestLocation(screenX, screenY) {
+      const d = dataRef.current;
+      if (!d?.locations) return null;
+      const vp = viewportRef.current;
+      const worldX = vp.x + screenX / vp.scale;
+      const worldY = vp.y + screenY / vp.scale;
+      const maxWorldDist = 60 / vp.scale; // 60px in screen space
+
+      let best = null;
+      let bestDist = maxWorldDist;
+      for (const loc of d.locations) {
+        const dx = loc.x - worldX;
+        const dy = loc.y - worldY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = loc;
+        }
+      }
+      return best;
+    }
+
+    // ===================== TOUCH HANDLERS =====================
 
     const handleTouchStart = (e) => {
+      cancelMomentum();
+      setLocationTooltip(null);
+
       if (e.touches.length === 1) {
+        const t = e.touches[0];
         draggingRef.current = true;
-        lastMouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        lastMouseRef.current = { x: t.clientX, y: t.clientY };
+        touchHistory.length = 0;
+        touchHistory.push({ x: t.clientX, y: t.clientY, time: Date.now() });
+
+        // Long-press detection
+        longPressTriggered = false;
+        longPressStartX = t.clientX;
+        longPressStartY = t.clientY;
+        cancelLongPress();
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true;
+          draggingRef.current = false;
+          const rect = canvas.getBoundingClientRect();
+          const loc = findNearestLocation(t.clientX - rect.left, t.clientY - rect.top);
+          if (loc) {
+            try { navigator.vibrate?.(10); } catch (_) {}
+            setLocationTooltip({
+              screenX: t.clientX - rect.left,
+              screenY: t.clientY - rect.top,
+              name: loc.name,
+              han: loc.han,
+              type: loc.type,
+            });
+          }
+        }, LONG_PRESS_DELAY);
       } else if (e.touches.length === 2) {
         draggingRef.current = false;
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        touchStartDist = Math.sqrt(dx * dx + dy * dy);
-        touchStartZoom = zoomRef.current;
+        cancelLongPress();
+
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dx = t0.clientX - t1.clientX;
+        const dy = t0.clientY - t1.clientY;
+        pinchStartDist = Math.sqrt(dx * dx + dy * dy);
+        pinchStartZoom = zoomRef.current;
+
+        // Midpoint in screen space
+        const rect = canvas.getBoundingClientRect();
+        pinchStartMidScreenX = (t0.clientX + t1.clientX) / 2 - rect.left;
+        pinchStartMidScreenY = (t0.clientY + t1.clientY) / 2 - rect.top;
+
+        // Midpoint in world space
+        const vp = viewportRef.current;
+        pinchStartMidWorldX = vp.x + pinchStartMidScreenX / vp.scale;
+        pinchStartMidWorldY = vp.y + pinchStartMidScreenY / vp.scale;
       }
     };
 
     const handleTouchMove = (e) => {
       e.preventDefault();
+
       if (e.touches.length === 1 && draggingRef.current) {
-        const dx = e.touches[0].clientX - lastMouseRef.current.x;
-        const dy = e.touches[0].clientY - lastMouseRef.current.y;
-        lastMouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        const t = e.touches[0];
+
+        // Cancel long-press if finger moved
+        const lpDx = t.clientX - longPressStartX;
+        const lpDy = t.clientY - longPressStartY;
+        if (Math.sqrt(lpDx * lpDx + lpDy * lpDy) > LONG_PRESS_MOVE_THRESHOLD) {
+          cancelLongPress();
+        }
+
+        const dx = t.clientX - lastMouseRef.current.x;
+        const dy = t.clientY - lastMouseRef.current.y;
+        lastMouseRef.current = { x: t.clientX, y: t.clientY };
+
+        // Track velocity
+        touchHistory.push({ x: t.clientX, y: t.clientY, time: Date.now() });
+        if (touchHistory.length > 5) touchHistory.shift();
+
         const vp = viewportRef.current;
         vp.x -= dx / vp.scale;
         vp.y -= dy / vp.scale;
@@ -242,29 +403,79 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
         vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
         drawRef.current?.();
       } else if (e.touches.length === 2) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        cancelLongPress();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dx = t0.clientX - t1.clientX;
+        const dy = t0.clientY - t1.clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const zoomDelta = Math.log2(dist / touchStartDist);
-        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(touchStartZoom + zoomDelta)));
+
+        // Continuous zoom (not snapped to integers)
+        const rawZoom = pinchStartZoom + Math.log2(dist / pinchStartDist);
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(rawZoom)));
+
         if (newZoom !== zoomRef.current) {
-          zoomRef.current = newZoom;
+          // Zoom toward the pinch midpoint (fixed in world space)
           const rect = canvas.getBoundingClientRect();
-          const vp = viewportRef.current;
-          const centerX = vp.x + vp.width / 2;
-          const centerY = vp.y + vp.height / 2;
+          const midScreenX = (t0.clientX + t1.clientX) / 2 - rect.left;
+          const midScreenY = (t0.clientY + t1.clientY) / 2 - rect.top;
+
+          zoomRef.current = newZoom;
           const newWorldWidth = WORLD_SIZE / Math.pow(2, newZoom);
+          const vp = viewportRef.current;
           vp.width = newWorldWidth;
           vp.height = (rect.height / rect.width) * newWorldWidth;
-          vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, centerX - vp.width / 2));
-          vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, centerY - vp.height / 2));
+
+          // Keep pinch midpoint world position under midpoint screen position
+          const ratioX = midScreenX / rect.width;
+          const ratioY = midScreenY / rect.height;
+          vp.x = pinchStartMidWorldX - ratioX * vp.width;
+          vp.y = pinchStartMidWorldY - ratioY * vp.height;
+
+          vp.x = Math.max(0, Math.min(WORLD_SIZE - vp.width, vp.x));
+          vp.y = Math.max(0, Math.min(WORLD_SIZE - vp.height, vp.y));
           vp.scale = rect.width / newWorldWidth;
           drawRef.current?.();
         }
       }
     };
 
-    const handleTouchEnd = () => { draggingRef.current = false; };
+    const handleTouchEnd = (e) => {
+      cancelLongPress();
+
+      if (e.touches.length === 0 && draggingRef.current) {
+        draggingRef.current = false;
+
+        // Double-tap detection (only if not a long press)
+        if (!longPressTriggered && e.changedTouches.length === 1) {
+          const t = e.changedTouches[0];
+          const now = Date.now();
+          const tapDx = t.clientX - lastTapX;
+          const tapDy = t.clientY - lastTapY;
+          const tapDist = Math.sqrt(tapDx * tapDx + tapDy * tapDy);
+
+          if (now - lastTapTime < DOUBLE_TAP_DELAY && tapDist < DOUBLE_TAP_DIST) {
+            // Double-tap: zoom in, or zoom out if at max
+            const rect = canvas.getBoundingClientRect();
+            const screenX = t.clientX - rect.left;
+            const screenY = t.clientY - rect.top;
+            const oldZoom = zoomRef.current;
+            const newZoom = oldZoom >= MAX_ZOOM ? MIN_ZOOM : Math.min(MAX_ZOOM, oldZoom + 2);
+            zoomTowardPoint(screenX, screenY, newZoom);
+            lastTapTime = 0; // reset to avoid triple-tap
+            return;
+          }
+
+          lastTapTime = now;
+          lastTapX = t.clientX;
+          lastTapY = t.clientY;
+
+          // Start momentum scrolling
+          startMomentum();
+        }
+      } else if (e.touches.length === 0) {
+        draggingRef.current = false;
+      }
+    };
 
     canvas.addEventListener('wheel', handleWheel, { passive: false });
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -275,6 +486,8 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
     canvas.addEventListener('touchend', handleTouchEnd);
 
     return () => {
+      cancelMomentum();
+      cancelLongPress();
       canvas.removeEventListener('wheel', handleWheel);
       canvas.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
@@ -283,7 +496,7 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
-  }, []); // stable — no deps, uses drawRef
+  }, []); // stable — no deps, uses drawRef + dataRef
 
   // ---------------------------------------------------------------------------
   // mapZoomTarget — fly-to a specific location
@@ -427,8 +640,51 @@ export default function MapViewer({ data, theme, mapZoomTarget, isVisible }) {
           height: '100%',
           cursor: 'grab',
           display: 'block',
+          touchAction: 'none',
         }}
       />
+
+      {/* Long-press location tooltip */}
+      {locationTooltip && (
+        <div
+          style={{
+            position: 'absolute',
+            left: Math.min(locationTooltip.screenX, (canvasRef.current?.parentElement?.offsetWidth || 300) - 180),
+            top: Math.max(8, locationTooltip.screenY - 70),
+            background: panelBg,
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: `1px solid ${borderColor}`,
+            borderRadius: 8,
+            padding: '8px 12px',
+            zIndex: 20,
+            pointerEvents: 'none',
+            maxWidth: 180,
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
+          <div style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--gold)',
+            lineHeight: 1.3,
+          }}>{locationTooltip.name}</div>
+          <div style={{
+            fontFamily: 'var(--font-han)',
+            fontSize: 11,
+            color: 'var(--text-dim)',
+            letterSpacing: 1,
+          }}>{locationTooltip.han}</div>
+          <div style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 11,
+            color: 'var(--text-dim)',
+            marginTop: 2,
+            fontStyle: 'italic',
+          }}>{locationTooltip.type}</div>
+        </div>
+      )}
 
       {/* Era Slider — positioned absolute bottom center */}
       {eras.length > 0 && (

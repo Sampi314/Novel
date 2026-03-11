@@ -88,6 +88,22 @@ function computeHeight(noise, wx, wy) {
 }
 
 // ---------------------------------------------------------------------------
+// Height sampling (used by RoadGenerator for terrain-aware paths)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sample terrain height at a world coordinate.
+ * Returns a value roughly in [-0.5, 0.8]. Negative = water, positive = land.
+ *
+ * @param {number} wx — world x (0-10000)
+ * @param {number} wy — world y (0-10000)
+ * @returns {number}
+ */
+export function sampleHeight(wx, wy) {
+  return computeHeight(getBaseNoise(), wx, wy);
+}
+
+// ---------------------------------------------------------------------------
 // Tile generation
 // ---------------------------------------------------------------------------
 
