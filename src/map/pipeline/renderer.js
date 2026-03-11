@@ -21,6 +21,11 @@ export function renderTile(heightmap, biomes, tileX, tileY, zoom, theme) {
   // How many tiles exist at this zoom level
   const tilesPerSide = Math.pow(2, zoom);
 
+  // Out-of-bounds tile — return transparent
+  if (tileX < 0 || tileY < 0 || tileX >= tilesPerSide || tileY >= tilesPerSide) {
+    return { data: pixels, width: TILE_SIZE, height: TILE_SIZE };
+  }
+
   // Each tile covers a portion of the GRID
   const cellsPerTile = GRID / tilesPerSide;
   const startCellX = tileX * cellsPerTile;

@@ -1,7 +1,6 @@
 // src/map/MapViewer.jsx
 import { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { WorldCRS, worldToLatLng, WORLD_BOUNDS } from './utils/crs.js';
 import { createTerrainTileLayer } from './TerrainTileLayer.js';
 import { createLocationLayer } from './layers/LocationLayer.js';
@@ -88,6 +87,14 @@ export default function MapViewer({
       workerRef.current = null;
     };
   }, []);
+
+  // Re-fit bounds when map becomes visible (container goes from 0x0 to real size)
+  useEffect(() => {
+    if (isVisible && mapRef.current) {
+      mapRef.current.invalidateSize();
+      mapRef.current.fitBounds(WORLD_BOUNDS);
+    }
+  }, [isVisible]);
 
   // Update terrain when T changes
   useEffect(() => {
