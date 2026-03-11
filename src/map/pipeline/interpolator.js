@@ -44,5 +44,8 @@ export function interpolateKeyframes(keyframes, T) {
   // Rivers: use whichever keyframe is closer
   const rivers = t < 0.5 ? lower.rivers : upper.rivers;
 
-  return { heightmap, biomes, rivers, T };
+  // Flow accumulation: use whichever keyframe is closer
+  const flowAccum = t < 0.5 ? lower.flowAccum : upper.flowAccum;
+
+  return { heightmap, biomes, rivers, flowAccum, T };
 }

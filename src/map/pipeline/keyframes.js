@@ -43,6 +43,7 @@ export function computeKeyframes(eras, worldSeed, onProgress) {
       heightmap,
       biomes,
       rivers,
+      flowAccum,
       plateMap,
       stress,
     });

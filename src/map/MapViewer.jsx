@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { WorldCRS, worldToLatLng, WORLD_BOUNDS } from './utils/crs.js';
 import { createTerrainTileLayer } from './TerrainTileLayer.js';
 import { createLocationLayer } from './layers/LocationLayer.js';
-import { createRiverLayer } from './layers/RiverLayer.js';
+import { createProceduralRiverLayer } from './layers/ProceduralRiverLayer.js';
 import { createTerritoryLayer } from './layers/TerritoryLayer.js';
 import LanguageToggle from './LanguageToggle.jsx';
 
@@ -27,6 +27,11 @@ export default function MapViewer({
   const [workerReady, setWorkerReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState('');
+
+  // D8 river data from worker (per keyframe)
+  const riverDataRef = useRef(null);
+  // Terrain-computed border paths from worker
+  const computedBordersRef = useRef(null);
 
   // Initialize map + worker on mount
   useEffect(() => {
@@ -57,11 +62,27 @@ export default function MapViewer({
     // Use addEventListener to avoid overwriting TerrainTileLayer's handler
     const onWorkerMsg = (e) => {
       if (e.data.type === 'init-complete') {
+        // Store D8 river data from worker
+        if (e.data.riverData) {
+          riverDataRef.current = e.data.riverData;
+        }
         setWorkerReady(true);
         setLoading(false);
+
+        // Request terrain-following borders
+        const territories = data?.territories;
+        if (territories && territories.length > 0) {
+          worker.postMessage({ type: 'compute-borders', territories, T: 0 });
+        }
       }
       if (e.data.type === 'init-progress') {
         setLoadProgress(`Keyframe ${e.data.done}/${e.data.total}`);
+      }
+      if (e.data.type === 'borders') {
+        computedBordersRef.current = e.data.borders;
+        // Trigger re-render of territory layer
+        setWorkerReady(prev => !prev); // toggle to trigger useEffect
+        setTimeout(() => setWorkerReady(true), 0);
       }
     };
     worker.addEventListener('message', onWorkerMsg);
@@ -118,7 +139,22 @@ export default function MapViewer({
     }
   }, [mapZoomTarget]);
 
-  // Update overlay layers when data changes
+  // Helper: get rivers for current T from the nearest keyframe
+  const getRiversForT = useCallback((T) => {
+    const rd = riverDataRef.current;
+    if (!rd || rd.length === 0) return null;
+
+    // Find nearest keyframe
+    let best = rd[0];
+    let bestDist = Math.abs(T - best.T);
+    for (const kf of rd) {
+      const d = Math.abs(T - kf.T);
+      if (d < bestDist) { bestDist = d; best = kf; }
+    }
+    return best.rivers;
+  }, []);
+
+  // Update overlay layers when data/T/theme changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !data) return;
@@ -131,26 +167,26 @@ export default function MapViewer({
     locLayer.addTo(map);
     locationLayerRef.current = locLayer;
 
-    // Rivers from world.json
+    // Rivers are now rendered directly in terrain tiles via flowAccum
+    // Vector overlay disabled — tile renderer handles river rendering
     if (riverLayerRef.current) {
       map.removeLayer(riverLayerRef.current);
-    }
-    if (data.rivers) {
-      const rivLayer = createRiverLayer(data.rivers, theme);
-      rivLayer.addTo(map);
-      riverLayerRef.current = rivLayer;
+      riverLayerRef.current = null;
     }
 
-    // Territories
+    // Territories (with terrain-following borders when available)
     if (territoryLayerRef.current) {
       map.removeLayer(territoryLayerRef.current);
     }
     if (data.territories) {
-      const terLayer = createTerritoryLayer(data.territories, theme, currentT, data.eras);
+      const terLayer = createTerritoryLayer(
+        data.territories, theme, currentT, data.eras,
+        computedBordersRef.current
+      );
       terLayer.addTo(map);
       territoryLayerRef.current = terLayer;
     }
-  }, [data, language, currentT, theme]);
+  }, [data, language, currentT, theme, workerReady]);
 
   // Era slider handler
   const handleSliderChange = useCallback((e) => {

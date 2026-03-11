@@ -15,7 +15,7 @@ const TILE_SIZE = 256;
  * @param {string} theme            'dark' | 'light'
  * @returns {{ data: Uint8ClampedArray, width: number, height: number }}
  */
-export function renderTile(heightmap, biomes, tileX, tileY, zoom, theme) {
+export function renderTile(heightmap, biomes, tileX, tileY, zoom, theme, flowAccum) {
   const pixels = new Uint8ClampedArray(TILE_SIZE * TILE_SIZE * 4);
 
   // How many tiles exist at this zoom level
@@ -70,6 +70,25 @@ export function renderTile(heightmap, biomes, tileX, tileY, zoom, theme) {
         r = Math.min(255, Math.round(r * sf));
         g = Math.min(255, Math.round(g * sf));
         b = Math.min(255, Math.round(b * sf));
+      }
+
+      // River rendering from flow accumulation
+      if (flowAccum && h >= 0) {
+        const accum = flowAccum[idx];
+        const riverThreshold = 150;
+        if (accum > riverThreshold) {
+          // River intensity based on accumulation (log scale)
+          const intensity = Math.min(1, Math.log(accum / riverThreshold) / Math.log(100));
+          // River color: deep water blue
+          const rr = theme === 'dark' ? 25 : 20;
+          const rg = theme === 'dark' ? 75 : 65;
+          const rb = theme === 'dark' ? 160 : 140;
+          // Blend: stronger for larger rivers
+          const blend = 0.4 + intensity * 0.55;
+          r = Math.round(r * (1 - blend) + rr * blend);
+          g = Math.round(g * (1 - blend) + rg * blend);
+          b = Math.round(b * (1 - blend) + rb * blend);
+        }
       }
 
       const pi = (py * TILE_SIZE + px) * 4;
