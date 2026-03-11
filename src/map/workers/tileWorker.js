@@ -1,32 +1,41 @@
-/**
- * tileWorker.js — Web Worker for off-main-thread terrain tile generation.
- *
- * Message protocol:
- *   IN:  { id, tx, ty, zoom, eraIndex, theme }
- *   OUT: { id, imageData: { data, width, height } }   (ArrayBuffer transferred)
- *   ERR: { id, error: string }
- */
+// src/map/workers/tileWorker.js
+import { computeKeyframes, GRID } from '../pipeline/keyframes.js';
+import { interpolateKeyframes } from '../pipeline/interpolator.js';
+import { renderTile } from '../pipeline/renderer.js';
 
-import { generateTerrainTile } from '../generators/TerrainGenerator.js';
+let keyframes = null;
 
-self.onmessage = (e) => {
-  const { id, tx, ty, zoom, eraIndex, theme } = e.data;
+self.onmessage = function (e) {
+  const { type } = e.data;
 
-  try {
-    const imageData = generateTerrainTile(tx, ty, zoom, eraIndex, theme);
+  if (type === 'init') {
+    const { eras, worldSeed } = e.data;
+    keyframes = computeKeyframes(eras, worldSeed, (done, total) => {
+      self.postMessage({ type: 'init-progress', done, total });
+    });
+    self.postMessage({ type: 'init-complete', keyframeCount: keyframes.length });
+    return;
+  }
 
+  if (type === 'tile') {
+    const { zoom, x, y, T, theme, requestId } = e.data;
+
+    if (!keyframes) {
+      self.postMessage({ type: 'error', requestId, error: 'Not initialized' });
+      return;
+    }
+
+    // Interpolate to current T
+    const { heightmap, biomes } = interpolateKeyframes(keyframes, T);
+
+    // Render the tile — returns { data: Uint8ClampedArray, width, height }
+    const tileData = renderTile(heightmap, biomes, x, y, zoom, theme);
+
+    // Transfer the pixel buffer (zero-copy)
     self.postMessage(
-      {
-        id,
-        imageData: {
-          data: imageData.data,
-          width: imageData.width,
-          height: imageData.height,
-        },
-      },
-      [imageData.data.buffer]
+      { type: 'tile', requestId, zoom, x, y, tileData },
+      [tileData.data.buffer]
     );
-  } catch (err) {
-    self.postMessage({ id, error: err.message });
+    return;
   }
 };

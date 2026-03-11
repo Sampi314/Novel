@@ -34,6 +34,7 @@ export default function App() {
   const [mapZoomTarget, setMapZoomTarget] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [theme, setTheme] = useState(() => localStorage.getItem('cng-theme') || 'dark');
+  const [language, setLanguage] = useState(() => localStorage.getItem('cng-language') || 'vi-zh');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -205,7 +206,7 @@ export default function App() {
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden', zIndex: 2 }}>
         {/* Map stays mounted, hidden via display */}
         <div style={{ width: '100%', height: '100%', display: activeTab === 'map' ? 'block' : 'none' }}>
-          <MapViewer data={data} theme={theme} mapZoomTarget={mapZoomTarget} isVisible={activeTab === 'map'} />
+          <MapViewer data={data} theme={theme} language={language} onLanguageChange={setLanguage} mapZoomTarget={mapZoomTarget} isVisible={activeTab === 'map'} />
         </div>
         {/* Other pages mount/unmount with slide-up transition */}
         {activeTab !== 'map' && (
