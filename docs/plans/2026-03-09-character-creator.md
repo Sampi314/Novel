@@ -67,7 +67,7 @@ export async function generateCharacterProfile({ coreFields, worldContext }) {
 }
 
 function buildSystemPrompt() {
-  return `You are "Tạo Nhân" — the character designer for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are "Tạo Nhân" — the character designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 
 CRITICAL: This world is completely ORIGINAL. Do NOT use standard xianxia clichés, "young master" archetypes, or generic cultivation tropes.
 

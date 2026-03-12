@@ -1,4 +1,4 @@
-# Cố Nguyên Giới (固元界) — Tổng Hợp Thiết Lập Thế Giới
+# Thiên Hoang Đại Lục (天荒大陸) — Tổng Hợp Thiết Lập Thế Giới
 
 ## 1. Nguồn Gốc Thế Giới
 

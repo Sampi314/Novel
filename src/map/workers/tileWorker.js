@@ -65,7 +65,7 @@ self.onmessage = function (e) {
       self.postMessage({ type: 'borders', borders: [] });
       return;
     }
-    const { heightmap } = interpolateKeyframes(keyframes, T);
+    const { heightmap, biomes } = interpolateKeyframes(keyframes, T);
 
     // Find nearest keyframe rivers for border snapping
     let nearestKf = keyframes[0];
@@ -75,7 +75,7 @@ self.onmessage = function (e) {
       if (d < minDist) { minDist = d; nearestKf = kf; }
     }
 
-    const borders = computeTerrainBorders(territories, heightmap, nearestKf.rivers, GRID);
+    const borders = computeTerrainBorders(territories, heightmap, nearestKf.rivers, GRID, biomes);
     self.postMessage({ type: 'borders', borders });
     return;
   }

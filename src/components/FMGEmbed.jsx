@@ -54,7 +54,7 @@ export default function FMGEmbed({ theme, mapZoomTarget, onNavigate }) {
         border: 'none',
         display: 'block',
       }}
-      title="Cố Nguyên Giới Map"
+      title="Thiên Hoang Đại Lục Map"
       allow="fullscreen"
     />
   );

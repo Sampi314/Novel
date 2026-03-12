@@ -3,7 +3,7 @@ import { getApiKey, setApiKey, callClaude, callClaudeText } from '../utils/claud
 import { getNextCharacterId, saveCharacter, deleteCharacter } from '../utils/characterStorage.js';
 
 function buildCharacterSystemPrompt() {
-  return `You are a character designer for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are a character designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 
 CRITICAL: This world is completely ORIGINAL. Do NOT reference cultivation systems, names, or tropes from other novels.
 
@@ -44,7 +44,7 @@ function buildCharacterUserMessage(form, data) {
   const eraObj = data.eras?.find(e => e.name === form.era);
   const locObj = data.locations?.find(l => l.id === form.location_id);
 
-  return `Create a character for Cố Nguyên Giới:
+  return `Create a character for Thiên Hoang Đại Lục:
 
 Concept: ${form.concept}
 Faction: ${factionObj?.name || form.faction} (${factionObj?.han || ''})
@@ -371,7 +371,7 @@ export default function CharacterCreatorModal({ isOpen, onClose, data, onCharact
         .map(([k, v]) => `${k}: ${String(v).substring(0, 200)}`)
         .join('\n');
 
-      const prompt = `You are a character designer for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL — no references to other novels.
+      const prompt = `You are a character designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world. CRITICAL: This world is ORIGINAL — no references to other novels.
 
 ${context}
 ${existing ? `\nExisting info:\n${existing}` : ''}

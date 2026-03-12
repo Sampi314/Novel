@@ -79,7 +79,7 @@ export default function LorePage({ data }) {
   return (
     <div style={s.page}>
       <div className="page-watermark">{'\u4E16'}</div>
-      <PageHeader title="Thế Giới" han="世界" subtitle="Lịch sử và quy luật của Cố Nguyên Giới" />
+      <PageHeader title="Thế Giới" han="世界" subtitle="Lịch sử và quy luật của Thiên Hoang Đại Lục" />
 
       {/* Creation */}
       <div className="card-reveal stagger-1" style={{ ...s.section, position: 'relative', overflow: 'hidden' }}>

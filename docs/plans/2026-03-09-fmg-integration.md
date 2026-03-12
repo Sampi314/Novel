@@ -93,8 +93,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Co Nguyen Gioi · 固元界',
-        short_name: '固元界',
+        name: 'Thien Hoang Dai Luc · 天荒大陸',
+        short_name: '天荒大陸',
         description: 'Interactive historical fantasy world map',
         theme_color: '#1a1209',
         background_color: '#1a1209',
@@ -160,7 +160,7 @@ export default function FMGEmbed({ theme, mapZoomTarget }) {
         border: 'none',
         display: 'block',
       }}
-      title="Co Nguyen Gioi Map"
+      title="Thien Hoang Dai Luc Map"
       allow="fullscreen"
     />
   );

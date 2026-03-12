@@ -6,7 +6,7 @@ import { uploadAudio } from '../utils/devFileWriter.js';
 import { writeFile } from '../utils/devFileWriter.js';
 
 const CATEGORIES = [
-  { id: 'tho', vi: 'Thơ', han: '詩', desc: 'Thơ ca của Cố Nguyên Giới' },
+  { id: 'tho', vi: 'Thơ', han: '詩', desc: 'Thơ ca của Thiên Hoang Đại Lục' },
   { id: 'nhac', vi: 'Nhạc', han: '樂', desc: 'Ca khúc và nhạc phẩm' },
   { id: 'van', vi: 'Văn', han: '文', desc: 'Văn xuôi và truyện ngắn' },
 ];
@@ -340,7 +340,7 @@ export default function LiteraturePage({ data, onNavigate }) {
   return (
     <div style={s.page}>
       <div className="page-watermark">文</div>
-      <PageHeader title="Văn Chương" han="文章" subtitle="Thơ, nhạc, và văn của Cố Nguyên Giới" />
+      <PageHeader title="Văn Chương" han="文章" subtitle="Thơ, nhạc, và văn của Thiên Hoang Đại Lục" />
 
       {/* Create button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>

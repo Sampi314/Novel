@@ -161,7 +161,7 @@ export default function App() {
             marginBottom: 8,
             textShadow: '0 0 40px rgba(196,163,90,0.3)',
             animation: 'fadeInUp 1s ease 0.3s both',
-          }}>Cố Nguyên Giới</div>
+          }}>Thiên Hoang Đại Lục</div>
           <div style={{
             fontFamily: "var(--font-han)",
             fontSize: 13,

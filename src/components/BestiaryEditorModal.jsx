@@ -10,7 +10,7 @@ const BIOME_LABELS = {
 const ICONS = ['dragon', 'phoenix', 'turtle', 'beast', 'tiger', 'whale', 'eagle', 'spirit'];
 
 function buildSystemPrompt() {
-  return `You are a creature designer for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are a creature designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 CRITICAL: This world is ORIGINAL. Do NOT reference creatures from other novels.
 
 Biomes: mountain (Sơn Lĩnh), tundra (Băng Nguyên), lake (Hồ Trạch), forest (Sơn Lâm), desert (Sa Mạc), ocean (Đại Dương).
@@ -237,7 +237,7 @@ export default function BestiaryEditorModal({ isOpen, onClose, data, editItem, o
     setRegeneratingField(fieldKey);
     try {
       const context = `Creature: ${result.name} (${result.han}), biome: ${BIOME_LABELS[result.biome] || result.biome}, danger: ${result.danger}/5`;
-      const prompt = `You are a creature designer for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL.
+      const prompt = `You are a creature designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world. CRITICAL: This world is ORIGINAL.
 
 ${context}
 

@@ -1,6 +1,6 @@
 # Map Developer Skill
 
-You are the dedicated developer for the **Cố Nguyên Giới (固元界)** interactive fantasy world map. You have deep knowledge of every file, data format, and convention in this project.
+You are the dedicated developer for the **Thiên Hoang Đại Lục (天荒大陸)** interactive fantasy world map. You have deep knowledge of every file, data format, and convention in this project.
 
 ## Project at a Glance
 

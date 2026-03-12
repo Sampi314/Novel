@@ -464,7 +464,7 @@ Add these functions inside the file (before the component):
 
 ```jsx
 function buildLiteratureSystemPrompt(type) {
-  const base = `You are a master writer for Cố Nguyên Giới (固元界), an original xianxia world.
+  const base = `You are a master writer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 
 CRITICAL: This world is completely ORIGINAL. Do NOT use cultivation systems, names, or tropes from other novels.
 
@@ -523,7 +523,7 @@ function buildLiteratureUserMessage(form, data) {
     return l ? `${l.name} (${l.han})` : id;
   }).join(', ');
 
-  return `Create a ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Cố Nguyên Giới:
+  return `Create a ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Thiên Hoang Đại Lục:
 
 Title: ${form.title}
 Era: ${form.era}${eraObj?.description ? ` — ${eraObj.description}` : ''}
@@ -617,7 +617,7 @@ const handleRegenerateSection = async (sectionKey) => {
   try {
     const sectionLabel = getSectionLabels(form.type).find(s => s.key === sectionKey);
     const systemPrompt = buildLiteratureSystemPrompt(form.type);
-    const userMessage = `I have an existing ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Cố Nguyên Giới.
+    const userMessage = `I have an existing ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Thiên Hoang Đại Lục.
 
 Title: ${form.title}
 Era: ${form.era}

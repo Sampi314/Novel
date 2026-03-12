@@ -8,7 +8,7 @@ const TYPE_LABELS = { battle: 'Chiến trận', founded: 'Thành lập', destroy
 function buildSystemPrompt(data) {
   const factions = data.factions?.map(f => `- ${f.id}: ${f.name} (${f.han})`).join('\n') || '';
   const locations = data.locations?.slice(0, 15).map(l => `- ${l.id}: ${l.name}`).join('\n') || '';
-  return `You are a historian for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are a historian for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 CRITICAL: This world is ORIGINAL. Do NOT reference events from other novels.
 
 Known factions:
@@ -172,7 +172,7 @@ export default function EventEditorModal({ isOpen, onClose, data, editItem, onSa
     try {
       const r = await callClaude({
         systemPrompt: buildSystemPrompt(data),
-        userMessage: `Create a historical event for Cố Nguyên Giới:\nType: ${TYPE_LABELS[form.type] || form.type}\nConcept: ${form.concept}\n\nExisting events for context:\n${data.events?.slice(0, 10).map(e => `- ${e.name} (year ${e.year})`).join('\n') || 'none'}\n\nRespond with ONLY JSON.`,
+        userMessage: `Create a historical event for Thiên Hoang Đại Lục:\nType: ${TYPE_LABELS[form.type] || form.type}\nConcept: ${form.concept}\n\nExisting events for context:\n${data.events?.slice(0, 10).map(e => `- ${e.name} (year ${e.year})`).join('\n') || 'none'}\n\nRespond with ONLY JSON.`,
         maxTokens: 4096,
       });
       setResult({
@@ -266,7 +266,7 @@ export default function EventEditorModal({ isOpen, onClose, data, editItem, onSa
     setRegeneratingField(fieldKey);
     try {
       const context = `Event: ${result.name} (${result.han}), type: ${TYPE_LABELS[result.type] || result.type}, year: ${result.year}`;
-      const prompt = `You are a historian for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL.
+      const prompt = `You are a historian for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world. CRITICAL: This world is ORIGINAL.
 
 ${context}
 

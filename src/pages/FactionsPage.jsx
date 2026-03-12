@@ -131,7 +131,7 @@ export default function FactionsPage({ data, onNavigate }) {
   return (
     <div style={s.page}>
       <div className="page-watermark">族</div>
-      <PageHeader title="Chủng Tộc" han="種族" subtitle={`Mười tộc của Cố Nguyên Giới · ${subRaces.length} nhánh nhỏ`} />
+      <PageHeader title="Chủng Tộc" han="種族" subtitle={`Mười tộc của Thiên Hoang Đại Lục · ${subRaces.length} nhánh nhỏ`} />
       <input
         className="search-input"
         style={{ width: 220, marginBottom: 20 }}

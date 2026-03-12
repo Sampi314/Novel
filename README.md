@@ -1,6 +1,6 @@
-# Cố Nguyên Giới 固元界
+# Thiên Hoang Đại Lục 天荒大陸
 
-Ứng dụng web tương tác khám phá thế giới tiên hiệp **Cố Nguyên Giới** — nơi mười tộc tồn tại trên một đại lục cổ đại, với hệ thống linh khí, tu luyện, và lịch sử trải dài hàng trăm ngàn năm.
+Ứng dụng web tương tác khám phá thế giới tiên hiệp **Thiên Hoang Đại Lục** — nơi mười tộc tồn tại trên một đại lục cổ đại, với hệ thống linh khí, tu luyện, và lịch sử trải dài hàng trăm ngàn năm.
 
 ## Tính năng
 

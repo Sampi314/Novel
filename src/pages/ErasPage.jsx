@@ -109,7 +109,7 @@ export default function ErasPage({ data, onNavigate }) {
   return (
     <div style={s.page}>
       <div className="page-watermark">{'\u7D00'}</div>
-      <PageHeader title="Kỷ Nguyên" han="紀元" subtitle="Các thời đại của Cố Nguyên Giới" />
+      <PageHeader title="Kỷ Nguyên" han="紀元" subtitle="Các thời đại của Thiên Hoang Đại Lục" />
 
       <input className="search-input" style={{ width: 200, marginBottom: 20 }} placeholder="Tìm kiếm kỷ nguyên..." value={searchQ} onChange={e => setSearchQ(e.target.value)} />
 

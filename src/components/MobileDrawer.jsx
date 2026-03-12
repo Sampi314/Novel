@@ -176,7 +176,7 @@ export default function MobileDrawer({ activeTab, onTabChange, theme, onToggleTh
             fontWeight: 700,
             letterSpacing: 3,
             textShadow: 'var(--shadow-gold)',
-          }}>Cố Nguyên Giới</div>
+          }}>Thiên Hoang Đại Lục</div>
           <div style={{
             fontFamily: 'var(--font-han)',
             fontSize: 11,

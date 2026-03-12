@@ -6,7 +6,7 @@
 
 ## Overview
 
-Add full mobile support to the Cố Nguyên Giới map app: proper touch gestures, responsive navigation, and PWA enhancements. Mobile users get the same capabilities as desktop.
+Add full mobile support to the Thiên Hoang Đại Lục map app: proper touch gestures, responsive navigation, and PWA enhancements. Mobile users get the same capabilities as desktop.
 
 ## A. Gesture System (MapViewer.jsx)
 

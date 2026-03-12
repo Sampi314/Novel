@@ -1,4 +1,4 @@
-// Bridge: receives messages from parent React app (Cố Nguyên Giới shell)
+// Bridge: receives messages from parent React app (Thiên Hoang Đại Lục shell)
 window.addEventListener('message', (event) => {
   const { type, ...data } = event.data || {};
 
@@ -22,7 +22,7 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Force Vietnamese as default culture set for Cố Nguyên Giới
+// Force Vietnamese as default culture set for Thiên Hoang Đại Lục
 localStorage.setItem('culturesSet', 'vietnamese');
 
 // Notify parent when FMG is ready

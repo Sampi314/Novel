@@ -1,6 +1,6 @@
 # World Stats Skill
 
-Quickly scan all data files and report a summary of the Cố Nguyên Giới world data.
+Quickly scan all data files and report a summary of the Thiên Hoang Đại Lục world data.
 
 ## Steps
 
@@ -22,7 +22,7 @@ Quickly scan all data files and report a summary of the Cố Nguyên Giới worl
 ## Output Format
 
 ```
-=== Cố Nguyên Giới World Stats ===
+=== Thiên Hoang Đại Lục World Stats ===
 
 Locations: X total
   - capital: X | city: X | port: X | sacred: X | ...

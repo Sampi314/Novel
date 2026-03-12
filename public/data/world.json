@@ -1,15 +1,15 @@
 {
   "creation": {
     "type": "natural",
-    "description": "Cố Nguyên Giới hình thành tự nhiên, không có thần sáng tạo. Thế giới sinh ra từ sự vận động của nguyên lực — hỗn mang ngưng tụ thành đất trời, linh khí tản ra khắp nơi.",
+    "description": "Thiên Hoang Đại Lục hình thành tự nhiên, không có thần sáng tạo. Thế giới sinh ra từ sự vận động của nguyên lực — hỗn mang ngưng tụ thành đất trời, linh khí tản ra khắp nơi.",
     "beliefs": "Mỗi tộc có thần thoại sáng tạo riêng, nhưng tất cả đều 'sai' — thế giới tự hình thành, không ai tạo ra. Các thần thoại phản ánh văn hóa và nguyện vọng của từng tộc hơn là sự thật."
   },
   "linhKhi": {
-    "description": "Linh khí (靈氣) tràn ngập khắp nơi trong Cố Nguyên Giới — trong đất, nước, không khí, sinh vật. Mật độ linh khí khác nhau tùy vùng, tạo nên vùng đất linh (qi cao) và vùng đất thường.",
+    "description": "Linh khí (靈氣) tràn ngập khắp nơi trong Thiên Hoang Đại Lục — trong đất, nước, không khí, sinh vật. Mật độ linh khí khác nhau tùy vùng, tạo nên vùng đất linh (qi cao) và vùng đất thường.",
     "han": "靈氣"
   },
   "powerSystem": {
-    "description": "Linh khí là nguồn năng lượng chung của Cố Nguyên Giới. Mỗi tộc hấp thu linh khí theo cách riêng, tạo nên nguồn lực đặc thù.",
+    "description": "Linh khí là nguồn năng lượng chung của Thiên Hoang Đại Lục. Mỗi tộc hấp thu linh khí theo cách riêng, tạo nên nguồn lực đặc thù.",
     "sharedSource": {
       "name": "Linh Khí",
       "han": "靈氣",
@@ -106,7 +106,7 @@
     {"id":"f04","name":"Nhân Tộc Vương Triều","han":"人族王朝","color":"#5a8cc4","capital":"l01","territory":"t02","era_start":0,"era_end":null,"description":"Từ bộ lạc phát triển lên vương triều, song song tồn tại gia tộc và tông môn. Đông nhất, xuất hiện khắp nơi. Có thể học pháp môn tộc khác nhưng kém bản gốc.","relations":[{"target":"f05","type":"complex"},{"target":"f06","type":"exploit"},{"target":"f10","type":"exploit"},{"target":"f03","type":"enemy"}]},
     {"id":"f05","name":"Yêu Tộc Vương Đình","han":"妖族王庭","color":"#9b7fba","capital":"l12","territory":"t03","era_start":-500000,"era_end":null,"description":"Vạn thú khai linh, tu luyện thành tinh. Xã hội phát triển giống Nhân Tộc với vương triều và tông môn riêng. Quan hệ với Nhân Tộc phức tạp — vừa kẻ thù vừa đồng minh tùy thời đại.","relations":[{"target":"f04","type":"complex"},{"target":"f01","type":"neutral"},{"target":"f08","type":"neutral"}]},
     {"id":"f06","name":"Cự Nhân Bộ Lạc","han":"巨人部落","color":"#b87333","capital":"l09","territory":"t07","era_start":0,"era_end":null,"description":"Người khổng lồ thô kệch nhưng có văn hóa riêng — giỏi rèn đúc và điêu khắc đá. Trí tuệ không cao nên thường bị các tộc khác lợi dụng làm lính đánh thuê.","relations":[{"target":"f01","type":"ally"},{"target":"f04","type":"vassal"}]},
-    {"id":"f07","name":"Vi Tộc Ẩn Thôn","han":"微族隱村","color":"#5ac48a","capital":"l16","territory":null,"era_start":-500000,"era_end":null,"description":"Người tí hon 5-30cm ẩn mình khắp Cố Nguyên Giới. Giỏi ẩn thân và ảo thuật, sống thành cộng đồng nhỏ rải rác. Biết mọi bí mật của thiên hạ nhưng hầu hết các tộc không biết chúng tồn tại.","relations":[]},
+    {"id":"f07","name":"Vi Tộc Ẩn Thôn","han":"微族隱村","color":"#5ac48a","capital":"l16","territory":null,"era_start":-500000,"era_end":null,"description":"Người tí hon 5-30cm ẩn mình khắp Thiên Hoang Đại Lục. Giỏi ẩn thân và ảo thuật, sống thành cộng đồng nhỏ rải rác. Biết mọi bí mật của thiên hạ nhưng hầu hết các tộc không biết chúng tồn tại.","relations":[]},
     {"id":"f08","name":"Tinh Linh Vương Quốc","han":"精靈王國","color":"#2ecc71","capital":"l26","territory":"t05","era_start":-500000,"era_end":null,"description":"Thực thể nguyên tố sinh ra từ tự nhiên — không nhất thiết hình người. Chia thành nhánh Mộc, Hỏa, Thủy, Thổ, Phong. Sống trong vương quốc rừng cổ, bảo vệ tự nhiên là tín ngưỡng tối cao.","relations":[{"target":"f02","type":"ally"},{"target":"f03","type":"ally"},{"target":"f04","type":"enemy"}]},
     {"id":"f09","name":"Hải Tộc Liên Bang","han":"海族聯邦","color":"#5ab8c4","capital":"l15","territory":"t04","era_start":-500000,"era_end":null,"description":"Vạn loài dưới đại dương khai linh. Liên bang hải vực, mỗi vùng biển một chúa tể. Giao thương với các tộc ven bờ nhưng yếu đi khi rời xa đại dương.","relations":[{"target":"f04","type":"trade"},{"target":"f05","type":"neutral"}]},
     {"id":"f10","name":"Thạch Tộc Thành Trì","han":"石族城池","color":"#8b8b83","capital":null,"territory":"t08","era_start":-500000,"era_end":null,"description":"Sinh vật đá khoáng tự tách phân thân để sinh sản. Ban đầu rải rác tĩnh lặng, dần tập trung thành bộ lạc và xây thành trì trong lòng núi. Thường bị các tộc khác xâm lấn khai thác khoáng sản.","relations":[{"target":"f04","type":"enemy"},{"target":"f06","type":"neutral"}]}

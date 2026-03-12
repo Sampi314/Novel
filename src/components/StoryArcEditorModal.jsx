@@ -5,7 +5,7 @@ import { getNextStoryArcId, saveStoryArc, deleteStoryArc } from '../utils/storyA
 function buildSystemPrompt(data) {
   const chars = data.characters?.slice(0, 15).map(c => `- ${c.id}: ${c.name} (${c.han}) — ${c.role}`).join('\n') || '';
   const events = data.events?.slice(0, 15).map(e => `- ${e.id}: ${e.name} (year ${e.year})`).join('\n') || '';
-  return `You are a storyteller for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are a storyteller for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 CRITICAL: This world is ORIGINAL. Do NOT reference stories from other novels.
 
 Key characters:
@@ -169,7 +169,7 @@ export default function StoryArcEditorModal({ isOpen, onClose, data, editItem, o
     try {
       const r = await callClaude({
         systemPrompt: buildSystemPrompt(data),
-        userMessage: `Create a story arc for Cố Nguyên Giới:\nConcept: ${form.concept}\n\nRespond with ONLY JSON.`,
+        userMessage: `Create a story arc for Thiên Hoang Đại Lục:\nConcept: ${form.concept}\n\nRespond with ONLY JSON.`,
         maxTokens: 4096,
       });
       setResult({
@@ -263,7 +263,7 @@ export default function StoryArcEditorModal({ isOpen, onClose, data, editItem, o
       const charNames = (result.characters || []).map(id => charMap[id]?.name || id).join(', ');
       const evNames = (result.events || []).map(id => eventMap[id]?.name || id).join(', ');
       const context = `Story Arc: ${result.name} (${result.han})\nCharacters: ${charNames || 'none'}\nEvents: ${evNames || 'none'}`;
-      const prompt = `You are a storyteller for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL.
+      const prompt = `You are a storyteller for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world. CRITICAL: This world is ORIGINAL.
 
 ${context}
 

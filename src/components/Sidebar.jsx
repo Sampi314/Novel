@@ -73,7 +73,7 @@ export default function Sidebar({ activeTab, onTabChange, theme, onToggleTheme }
               letterSpacing: 3,
               lineHeight: 1.3,
               textShadow: 'var(--shadow-gold)',
-            }}>Cố Nguyên Giới</div>
+            }}>Thiên Hoang Đại Lục</div>
             <div style={{
               fontFamily: "var(--font-han)",
               fontSize: 11,

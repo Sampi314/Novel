@@ -191,7 +191,7 @@ export default function HomePage({ data, onNavigate }) {
           zIndex: 1,
           textShadow: '0 0 60px var(--gold-glow-strong), 0 2px 4px rgba(0,0,0,0.5)',
           animation: 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both',
-        }}>Cố Nguyên Giới</div>
+        }}>Thiên Hoang Đại Lục</div>
 
         {/* Han subtitle */}
         <div style={{

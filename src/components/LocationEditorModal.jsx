@@ -11,7 +11,7 @@ const QI_LEVELS = ['tối cao', 'cao', 'trung', 'thấp', 'âm', 'dương'];
 
 function buildSystemPrompt(data) {
   const factions = data.factions?.map(f => `- ${f.name} (${f.han})`).join('\n') || '';
-  return `You are a location designer for Cố Nguyên Giới (固元界), an original xianxia world.
+  return `You are a location designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 CRITICAL: This world is ORIGINAL. Do NOT reference locations from other novels.
 
 Known factions:
@@ -164,7 +164,7 @@ export default function LocationEditorModal({ isOpen, onClose, data, editItem, o
     try {
       const r = await callClaude({
         systemPrompt: buildSystemPrompt(data),
-        userMessage: `Create a location for Cố Nguyên Giới:\nType: ${TYPE_LABELS[form.type] || form.type}\nRace: ${form.race || 'any'}\nConcept: ${form.concept}\n\nRespond with ONLY JSON.`,
+        userMessage: `Create a location for Thiên Hoang Đại Lục:\nType: ${TYPE_LABELS[form.type] || form.type}\nRace: ${form.race || 'any'}\nConcept: ${form.concept}\n\nRespond with ONLY JSON.`,
         maxTokens: 4096,
       });
       setResult({
@@ -239,7 +239,7 @@ export default function LocationEditorModal({ isOpen, onClose, data, editItem, o
     setRegeneratingField(fieldKey);
     try {
       const context = `Location: ${result.name} (${result.han}), type: ${TYPE_LABELS[result.type] || result.type}, race: ${result.race}, qi: ${result.qi}`;
-      const prompt = `You are a location designer for Cố Nguyên Giới (固元界), an original xianxia world. CRITICAL: This world is ORIGINAL.
+      const prompt = `You are a location designer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world. CRITICAL: This world is ORIGINAL.
 
 ${context}
 

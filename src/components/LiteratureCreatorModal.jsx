@@ -23,7 +23,7 @@ function getSectionLabels(type) {
 }
 
 function buildLiteratureSystemPrompt(type) {
-  const base = `You are a master writer for Cố Nguyên Giới (固元界), an original xianxia world.
+  const base = `You are a master writer for Thiên Hoang Đại Lục (天荒大陸), an original xianxia world.
 
 CRITICAL: This world is completely ORIGINAL. Do NOT use cultivation systems, names, or tropes from other novels.
 
@@ -80,7 +80,7 @@ function buildLiteratureUserMessage(form, data) {
     return l ? `${l.name} (${l.han || ''})` : id;
   }).join(', ');
 
-  return `Create a ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Cố Nguyên Giới:
+  return `Create a ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Thiên Hoang Đại Lục:
 
 Title: ${form.title}
 Era: ${form.era}${eraObj?.description ? ` — ${eraObj.description}` : ''}
@@ -346,7 +346,7 @@ export default function LiteratureCreatorModal({ isOpen, onClose, data, onLitera
     try {
       const sectionLabel = getSectionLabels(form.type).find(s => s.key === sectionKey);
       const systemPrompt = buildLiteratureSystemPrompt(form.type);
-      const userMessage = `I have an existing ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Cố Nguyên Giới.
+      const userMessage = `I have an existing ${form.type === 'tho' ? 'poem' : form.type === 'nhac' ? 'song' : 'prose piece'} for Thiên Hoang Đại Lục.
 
 Title: ${form.title}
 Era: ${form.era}
@@ -444,7 +444,7 @@ Please REGENERATE ONLY the "${sectionLabel.vi}" (${sectionLabel.han}) section. K
       for (let i = 0; i < total; i++) {
         setSeriesProgress(p => ({ ...p, current: i + 1 }));
         const systemPrompt = buildLiteratureSystemPrompt(seriesForm.type);
-        const userMessage = `Create ${seriesForm.type === 'tho' ? 'a poem' : seriesForm.type === 'nhac' ? 'a song' : 'a prose piece'} for Cố Nguyên Giới.
+        const userMessage = `Create ${seriesForm.type === 'tho' ? 'a poem' : seriesForm.type === 'nhac' ? 'a song' : 'a prose piece'} for Thiên Hoang Đại Lục.
 
 This is piece ${i + 1} of ${total} in a themed series.
 Era: ${seriesForm.era}
